@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.palmfarm.controller.palmcare.UseResourceViewController"
+            style="-fx-background-color:#1a2a1a;">
+  <center>
+    <VBox spacing="8" style="-fx-padding:15;">
+      <HBox spacing="8" alignment="CENTER_LEFT">
+        <Label text="ใบสั่งงานที่ยังไม่เสร็จ:" style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;"/>
+        <Button text="" onAction="#handleRefresh"
+                style="-fx-background-color:#2196F3;-fx-text-fill:white;-fx-cursor:hand;"/>
+      </HBox>
+      <TableView fx:id="tableTask" VBox.vgrow="ALWAYS" prefHeight="280"
+                 style="-fx-background-color:#243224;-fx-control-inner-background:#243224;">
+        <columns>
+          <TableColumn fx:id="colTaskId"      text="ID"       prefWidth="60"/>
+          <TableColumn fx:id="colTaskDesc"    text="คำอธิบาย"  prefWidth="250"/>
+          <TableColumn fx:id="colTaskStatus"  text="สถานะ"    prefWidth="120"/>
+          <TableColumn fx:id="colTaskDeadline" text="กำหนดส่ง" prefWidth="130"/>
+        </columns>
+        <placeholder><Label text="ไม่มีงานค้าง" style="-fx-text-fill:#88aa88;"/></placeholder>
+      </TableView>
+      <Label text="ทรัพยากรสำหรับงานที่เลือก:" style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;"/>
+      <TableView fx:id="tableReservation" VBox.vgrow="ALWAYS" prefHeight="180"
+                 style="-fx-background-color:#243224;-fx-control-inner-background:#243224;">
+        <columns>
+          <TableColumn fx:id="colRlName" text="ทรัพยากร" prefWidth="200"/>
+          <TableColumn fx:id="colRlType" text="ประเภท"   prefWidth="130"/>
+          <TableColumn fx:id="colRlUsed" text="สถานะ"    prefWidth="130"/>
+        </columns>
+      </TableView>
+      <HBox spacing="10">
+        <Button text="บันทึกการใช้ทรัพยากร" onAction="#handleMarkUsed"
+                style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-font-size:13px;-fx-cursor:hand;-fx-padding:8 16;"/>
+        <Label fx:id="lblMsg" text="" style="-fx-text-fill:#88ff88;"/>
+      </HBox>
+    </VBox>
+  </center>
+</BorderPane>

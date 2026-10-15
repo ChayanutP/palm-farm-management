@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.palmfarm.controller.resource.ManageResourceViewController"
+            style="-fx-background-color:#1a2a1a;">
+  <center>
+    <VBox spacing="10" style="-fx-padding:15;">
+      <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label text="ชื่อ:" style="-fx-text-fill:#ccddcc;"/>
+        <TextField fx:id="txtResName" prefWidth="220" promptText="ชื่อทรัพยากร"
+                   style="-fx-background-color:#2d3e2d;-fx-text-fill:white;"/>
+        <Label text="ประเภท:" style="-fx-text-fill:#ccddcc;"/>
+        <ComboBox fx:id="cbResType" prefWidth="155" promptText="ประเภท"/>
+        <Button text="+ เพิ่ม" onAction="#handleAddResource"
+                style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;"/>
+        <Button text="" onAction="#handleRefresh"
+                style="-fx-background-color:#2196F3;-fx-text-fill:white;-fx-cursor:hand;"/>
+      </HBox>
+      <Label fx:id="lblMsg" text="" style="-fx-text-fill:#88ff88;"/>
+      <TableView fx:id="tableResource" VBox.vgrow="ALWAYS"
+                 style="-fx-background-color:#243224;-fx-control-inner-background:#243224;">
+        <columns>
+          <TableColumn fx:id="colResId"     text="ID"    prefWidth="60"/>
+          <TableColumn fx:id="colResName"   text="ชื่อ"   prefWidth="280"/>
+          <TableColumn fx:id="colResType"   text="ประเภท" prefWidth="150"/>
+          <TableColumn fx:id="colResStatus" text="สถานะ"  prefWidth="150"/>
+        </columns>
+        <placeholder><Label text="ไม่มีข้อมูล" style="-fx-text-fill:#88aa88;"/></placeholder>
+      </TableView>
+    </VBox>
+  </center>
+</BorderPane>

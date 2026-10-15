@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.palmfarm.controller.resource.SchedulingViewController"
+            style="-fx-background-color: #1a2a1a;">
+    <center>
+        <VBox spacing="8" style="-fx-padding: 15;">
+
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="งานทั้งหมดที่ยังไม่เสร็จ (กดปุ่ม เลื่อน ที่แถวขวาสุดเพื่อเปลี่ยน Deadline):"
+                       style="-fx-text-fill: #aaccaa; -fx-font-weight: bold;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnRefresh" text="รีเฟรช" onAction="#handleRefresh"
+                        style="-fx-background-color: #2196F3; -fx-text-fill: white;
+                               -fx-cursor: hand; -fx-padding: 5 12;"/>
+            </HBox>
+
+            <TableView fx:id="tableTask" VBox.vgrow="ALWAYS"
+                       style="-fx-background-color: #243224; -fx-control-inner-background: #243224;">
+                <columns>
+                    <TableColumn fx:id="colId"          text="ID"            prefWidth="55"/>
+                    <TableColumn fx:id="colDesc"         text="คำอธิบาย"     prefWidth="250"/>
+                    <TableColumn fx:id="colPlantation"   text="สวนปาล์ม"     prefWidth="120"/>
+                    <TableColumn fx:id="colDept"         text="ฝ่าย"          prefWidth="110"/>
+                    <TableColumn fx:id="colComplete"     text="สถานะงาน"     prefWidth="145"/>
+                    <TableColumn fx:id="colOrdered"      text="สถานะมอบหมาย" prefWidth="145"/>
+                    <TableColumn fx:id="colDeadline"     text="Deadline"      prefWidth="110"/>
+                    <TableColumn fx:id="colAction"       text="เลื่อน"        prefWidth="90"/>
+                </columns>
+                <placeholder>
+                    <Label text="ไม่มีงานที่ยังไม่เสร็จ"
+                           style="-fx-text-fill: #88aa88;"/>
+                </placeholder>
+            </TableView>
+
+            <Label fx:id="lblMsg" text="" wrapText="true" style="-fx-font-size: 12px;"/>
+
+        </VBox>
+    </center>
+</BorderPane>
