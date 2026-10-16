@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane style="-fx-background-color:#1a2a1a;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.palmfarm.controller.resource.AssignResourceViewController">
+  <center>
+    <VBox spacing="10" style="-fx-padding:15;">
+
+      <!-- Task selector row -->
+      <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-background-color:#243224;-fx-padding:12;-fx-background-radius:6;">
+        <Label style="-fx-text-fill:#ccddcc;-fx-font-weight:bold;" text="ใบสั่งงาน" />
+        <ComboBox fx:id="cbTask" prefWidth="420" />
+        <VBox spacing="2">
+          <Label fx:id="lblTaskPlantation" style="-fx-text-fill:#88cc88;-fx-font-size:12px;" text="สวน:" />
+          <Label fx:id="lblTaskDeadline" style="-fx-text-fill:#aaccaa;-fx-font-size:12px;" text="กำหนดส่ง: " />
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <Button onAction="#handleRefresh" style="-fx-background-color:#607D8B;-fx-text-fill:white;-fx-cursor:hand;" text="รีเฟรช" />
+      </HBox>
+
+      <!-- Main content: resource table (left) + reservation list (right) -->
+      <HBox spacing="12" VBox.vgrow="ALWAYS">
+
+        <!-- ซ้าย: ตารางทรัพยากร + checkbox -->
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+          <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;" text="ทรัพยากรที่พร้อมใช้งาน (เลือกได้หลายรายการ):" />
+            <Button onAction="#handleAssign" style="-fx-background-color:#FF9800;-fx-text-fill:white;                            -fx-cursor:hand;-fx-font-weight:bold;-fx-padding:6 14;" text="จัดสรรที่เลือกทั้งหมด" />
+          </HBox>
+          <TableView fx:id="tableResource" editable="true" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">
+            <columns>
+              <TableColumn fx:id="colCheck" editable="true" prefWidth="60" text="เลือก" />
+              <TableColumn fx:id="colResId" prefWidth="55" text="ID" />
+              <TableColumn fx:id="colResName" prefWidth="230" text="ชื่อ" />
+              <TableColumn fx:id="colResType" prefWidth="110" text="ประเภท" />
+              <TableColumn fx:id="colResStatus" prefWidth="100" text="สถานะ" />
+            </columns>
+            <placeholder>
+              <Label style="-fx-text-fill:#88aa88;" text="ไม่มีทรัพยากรที่พร้อมใช้งาน" />
+            </placeholder>
+          </TableView>
+          <Label fx:id="lblMsg" style="-fx-font-size:12px;" text="" wrapText="true" />
+        </VBox>
+
+        <!-- ขวา: รายการที่จัดสรรให้ task นี้แล้ว -->
+        <VBox prefWidth="340" spacing="6">
+          <Label style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;" text="ทรัพยากรที่จัดสรรให้ใบสั่งงานนี้แล้ว:" />
+          <TableView fx:id="tableReservation" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">
+            <columns>
+              <TableColumn fx:id="colRlResource" prefWidth="145" text="ทรัพยากร" />
+              <TableColumn fx:id="colRlType" prefWidth="90" text="ประเภท" />
+              <TableColumn fx:id="colRlDate" prefWidth="105" text="วันที่" />
+              <TableColumn fx:id="colRlStatus" prefWidth="90" text="สถานะ" />
+            </columns>
+            <placeholder>
+              <Label style="-fx-text-fill:#88aa88;" text="เลือก Task เพื่อดูรายการ" />
+            </placeholder>
+          </TableView>
+        </VBox>
+
+      </HBox>
+    </VBox>
+  </center>
+</BorderPane>

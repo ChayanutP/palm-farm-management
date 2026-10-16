@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.palmfarm.controller.resource.DeallocateTaskViewController"
+            style="-fx-background-color: #1a2a1a;">
+    <center>
+        <VBox spacing="8" style="-fx-padding: 15;">
+
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="Task ที่จัดสรรแล้ว (ยังไม่ส่งงาน):"
+                       style="-fx-text-fill: #aaccaa; -fx-font-weight: bold;"/>
+                <Button text="รีเฟรช" onAction="#handleRefresh"
+                        style="-fx-background-color: #2196F3; -fx-text-fill: white;
+                               -fx-cursor: hand; -fx-padding: 5 12;"/>
+            </HBox>
+
+            <TableView fx:id="tableTask" VBox.vgrow="ALWAYS" prefHeight="280"
+                       style="-fx-background-color: #243224; -fx-control-inner-background: #243224;">
+                <columns>
+                    <TableColumn fx:id="colTaskId"         text="ID"          prefWidth="55"/>
+                    <TableColumn fx:id="colTaskDesc"       text="คำอธิบาย"    prefWidth="260"/>
+                    <TableColumn fx:id="colTaskPlantation" text="สวนปาล์ม"    prefWidth="130"/>
+                    <TableColumn fx:id="colTaskDept"       text="ฝ่าย"         prefWidth="120"/>
+                    <TableColumn fx:id="colTaskDeadline"   text="กำหนดส่ง"    prefWidth="120"/>
+                    <TableColumn fx:id="colTaskAllocated"  text="สถานะจัดสรร"  prefWidth="130"/>
+                </columns>
+                <placeholder>
+                    <Label text="ไม่มี Task ที่จัดสรรแล้วและรอมอบหมาย"
+                           style="-fx-text-fill: #88aa88;"/>
+                </placeholder>
+            </TableView>
+
+            <Label text="ทรัพยากรที่จัดสรรให้ Task นี้:"
+                   style="-fx-text-fill: #aaccaa; -fx-font-weight: bold;"/>
+
+            <TableView fx:id="tableReservation" VBox.vgrow="ALWAYS" prefHeight="200"
+                       style="-fx-background-color: #243224; -fx-control-inner-background: #243224;">
+                <columns>
+                    <TableColumn fx:id="colRlId"       text="ID"        prefWidth="55"/>
+                    <TableColumn fx:id="colRlResource" text="ทรัพยากร"   prefWidth="220"/>
+                    <TableColumn fx:id="colRlType"     text="ประเภท"     prefWidth="120"/>
+                    <TableColumn fx:id="colRlDate"     text="วันที่จอง"  prefWidth="130"/>
+                    <TableColumn fx:id="colRlStatus"   text="สถานะ"      prefWidth="110"/>
+                </columns>
+                <placeholder>
+                    <Label text="เลือก Task เพื่อดูทรัพยากรที่จัดสรร"
+                           style="-fx-text-fill: #88aa88;"/>
+                </placeholder>
+            </TableView>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button fx:id="btnDeallocate"
+                        text="ยกเลิกการจัดสรรทรัพยากร"
+                        onAction="#handleDeallocate" disable="true"
+                        style="-fx-background-color: #c0392b; -fx-text-fill: white;
+                               -fx-font-size: 13px; -fx-font-weight: bold;
+                               -fx-cursor: hand; -fx-padding: 8 18; -fx-background-radius: 6;"/>
+                <Label fx:id="lblMsg" text="" wrapText="true"
+                       style="-fx-font-size: 12px;"/>
+            </HBox>
+
+        </VBox>
+    </center>
+</BorderPane>
