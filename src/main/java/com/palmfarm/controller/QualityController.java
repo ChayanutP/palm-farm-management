@@ -28,7 +28,26 @@ public class QualityController {
             SELECT t.*, p.name AS plantation_name
             FROM task t
             LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-            WHERE t.department = 'QUALITY' AND t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE
+            WHERE t.department = 'QUALITY' AND t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.requisition_status = FALSE
+            ORDER BY t.deadline ASC
+            """;
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(taskMC.mapFromResultSet(rs));
+        } catch (SQLException e) {
+            errorMessage = "ดึงข้อมูล Task ไม่สำเร็จ: " + e.getMessage();
+        }
+        return list;
+    }
+
+    public List<TaskModel> getQualityTasksForReturn() {
+        List<TaskModel> list = new ArrayList<>();
+        String sql = """
+            SELECT t.*, p.name AS plantation_name
+            FROM task t
+            LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+            WHERE t.department = 'QUALITY' AND t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.requisition_status = TRUE
             ORDER BY t.deadline ASC
             """;
         try (Connection con = DBConnection.getConnection();

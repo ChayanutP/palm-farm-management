@@ -3,7 +3,6 @@ package com.palmfarm.controller.palmcare;
 import com.palmfarm.controller.PalmCareController;
 import com.palmfarm.model.ReservationLineModel;
 import com.palmfarm.model.TaskModel;
-
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -11,22 +10,23 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class ReturnResourceViewController implements Initializable {
 
-    @FXML private TableView<TaskModel>              tableAssigned;
-    @FXML private TableColumn<TaskModel, Integer>   colAssignId;
-    @FXML private TableColumn<TaskModel, String>    colAssignDesc;
-    @FXML private TableColumn<TaskModel, String>    colAssignPlantation;
-    @FXML private TableColumn<TaskModel, String>    colAssignStatus;
-    @FXML private TableColumn<TaskModel, String>    colAssignOrdered;
+    @FXML private TableView<TaskModel>              tableTask;
+    @FXML private TableColumn<TaskModel, Integer>   colTaskId;
+    @FXML private TableColumn<TaskModel, String>    colTaskDesc;
+    @FXML private TableColumn<TaskModel, String>    colTaskPlantation;
+    @FXML private TableColumn<TaskModel, String>    colTaskStatus;
+    @FXML private TableColumn<TaskModel, String>    colTaskOrdered;
+    @FXML private TableColumn<TaskModel, String>    colTaskDeadline;
 
-    @FXML private TableView<ReservationLineModel>           tableReturn;
-    @FXML private TableColumn<ReservationLineModel, String> colRetName;
-    @FXML private TableColumn<ReservationLineModel, String> colRetReturn;
+    @FXML private TableView<ReservationLineModel>           tableReservation;
+    @FXML private TableColumn<ReservationLineModel, String> colRlName;
+    @FXML private TableColumn<ReservationLineModel, String> colRlType;
+    @FXML private TableColumn<ReservationLineModel, String> colRlReturn;
 
     @FXML private Button btnComplete;
     @FXML private Label  lblMsg;
@@ -41,72 +41,66 @@ public class ReturnResourceViewController implements Initializable {
     }
 
     private void setupTable() {
-        colAssignId.setCellValueFactory(d ->
+        colTaskId.setCellValueFactory(d ->
             new SimpleIntegerProperty(ctrl.task().getTaskId(d.getValue())).asObject());
-        colAssignDesc.setCellValueFactory(d ->
+        colTaskDesc.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getDescription(d.getValue())));
-        colAssignPlantation.setCellValueFactory(d ->
+        colTaskPlantation.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getPlantationName(d.getValue())));
-        // ใช้ display helpers
-        colAssignStatus.setCellValueFactory(d ->
+        colTaskStatus.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getCompleteStatusDisplay(d.getValue())));
-        colAssignOrdered.setCellValueFactory(d ->
+        colTaskOrdered.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getOrderedStatusDisplay(d.getValue())));
-
-        colRetName.setCellValueFactory(d ->
+        colTaskDeadline.setCellValueFactory(d ->
+            new SimpleStringProperty(ctrl.task().getDeadline(d.getValue())));
+        colRlName.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.rl().getResourceName(d.getValue())));
-        colRetReturn.setCellValueFactory(d ->
+        colRlType.setCellValueFactory(d ->
+            new SimpleStringProperty(ctrl.rl().getResourceType(d.getValue())));
+        colRlReturn.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.rl().getReturnStatus(d.getValue())));
 
-        tableAssigned.getSelectionModel().selectedItemProperty().addListener((obs, old, nw) -> {
+        tableTask.getSelectionModel().selectedItemProperty().addListener((obs, old, nw) -> {
             if (nw != null) {
                 selectedTask = nw;
-                tableReturn.setItems(FXCollections.observableArrayList(
+                tableReservation.setItems(FXCollections.observableArrayList(
                     ctrl.getReservationsForTask(ctrl.task().getTaskId(nw))));
                 updateCompleteButton();
             }
         });
     }
 
-    /** ปิดปุ่มเสร็จสิ้นถ้า task ยังไม่ได้ส่ง (is_ordered = FALSE) */
     private void updateCompleteButton() {
-        if (selectedTask == null) {
-            btnComplete.setDisable(true);
-            lblMsg.setText("");
-            return;
-        }
+        if (selectedTask == null) { btnComplete.setDisable(true); lblMsg.setText(""); return; }
         boolean ordered = ctrl.task().isOrdered(selectedTask);
         btnComplete.setDisable(!ordered);
         if (!ordered) {
-            lblMsg.setStyle("-fx-text-fill: #ff8888;");
-            lblMsg.setText("งานนี้ยังไม่ได้รับการมอบหมาย (ยังไม่ส่งงาน) ไม่สามารถกดเสร็จสิ้นได้");
+            lblMsg.setStyle("-fx-text-fill:#ff8888;");
+            lblMsg.setText("งานนี้ยังไม่ได้รับการมอบหมาย ไม่สามารถกดเสร็จสิ้นได้");
         } else {
             lblMsg.setText("");
         }
     }
 
     private void loadTasks() {
-        tableAssigned.setItems(FXCollections.observableArrayList(ctrl.getAssignedTasks()));
+        tableTask.setItems(FXCollections.observableArrayList(ctrl.getTasksForReturn()));
+        tableReservation.getItems().clear();
         selectedTask = null;
         btnComplete.setDisable(true);
-        tableReturn.getItems().clear();
     }
 
     @FXML public void handleCompleteTask(ActionEvent e) {
         if (selectedTask == null) { lblMsg.setText("กรุณาเลือกงาน"); return; }
-
-        // guard เพิ่มอีกชั้น — เผื่อ button ยังโดนกดได้
         if (!ctrl.task().isOrdered(selectedTask)) {
-            lblMsg.setStyle("-fx-text-fill: #ff8888;");
+            lblMsg.setStyle("-fx-text-fill:#ff8888;");
             lblMsg.setText("งานนี้ยังไม่ได้รับการมอบหมาย ไม่สามารถเสร็จสิ้นได้");
             return;
         }
-                boolean ok = ctrl.completeTaskAndReturnResources(ctrl.task().getTaskId(selectedTask));
-                lblMsg.setStyle(ok ? "-fx-text-fill: #88ff88;" : "-fx-text-fill: #ff8888;");
-                lblMsg.setText(ok ? ctrl.getSuccessMessage() : ctrl.getErrorMessage());
-                ctrl.clearMessages();
-                loadTasks();
-            
+        boolean ok = ctrl.completeTaskAndReturnResources(ctrl.task().getTaskId(selectedTask));
+        lblMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#ff8888;");
+        lblMsg.setText(ok ? ctrl.getSuccessMessage() : ctrl.getErrorMessage());
+        ctrl.clearMessages();
+        loadTasks();
     }
 
     @FXML public void handleRefresh(ActionEvent e) { loadTasks(); lblMsg.setText(""); }

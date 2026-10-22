@@ -29,7 +29,28 @@ public class PalmCareController {
             SELECT t.*, p.name AS plantation_name
             FROM task t
             LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-            WHERE t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.department = ?
+            WHERE t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.department = ? AND t.requisition_status = FALSE
+            ORDER BY t.deadline ASC
+            """;
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, dept);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(taskMC.mapFromResultSet(rs));
+        } catch (SQLException e) {
+            errorMessage = "ดึงข้อมูล Task ไม่สำเร็จ: " + e.getMessage();
+        }
+        return list;
+    }
+
+    public List<TaskModel> getTasksForReturn() {
+        List<TaskModel> list = new ArrayList<>();
+        String dept = empMC.getDepartment(SessionManager.getCurrentUser());
+        String sql  = """
+            SELECT t.*, p.name AS plantation_name
+            FROM task t
+            LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+            WHERE t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.department = ? AND t.requisition_status = TRUE
             ORDER BY t.deadline ASC
             """;
         try (Connection con = DBConnection.getConnection();

@@ -81,7 +81,7 @@ public class ReturnResourceViewController implements Initializable {
     }
 
     private void loadTasks() {
-        tableTask.setItems(FXCollections.observableArrayList(ctrl.getQualityTasks()));
+        tableTask.setItems(FXCollections.observableArrayList(ctrl.getQualityTasksForReturn()));
         tableReservation.getItems().clear();
         selectedTask = null;
         btnComplete.setDisable(true);
