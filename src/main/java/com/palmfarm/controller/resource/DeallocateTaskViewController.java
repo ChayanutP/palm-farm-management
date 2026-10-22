@@ -75,7 +75,7 @@ public class DeallocateTaskViewController implements Initializable {
         colTaskPlantation.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getPlantationName(d.getValue())));
         colTaskDept.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.task().getDepartment(d.getValue())));
+            new SimpleStringProperty(ctrl.task().getDepartmentDisplay(d.getValue())));
         colTaskDeadline.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getDeadline(d.getValue())));
         colTaskAllocated.setCellValueFactory(d ->

@@ -5,31 +5,23 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static final String URL = "jdbc:mysql://localhost:3306/palm_farm?useSSL=false&serverTimezone=Asia/Bangkok&characterEncoding=UTF-8";
-    private static final String USER = "root";
+    private static final String URL =
+        "jdbc:mysql://localhost:3306/palm_farm?useSSL=false&serverTimezone=Asia/Bangkok&characterEncoding=UTF-8";
+    private static final String USER     = "root";
     private static final String PASSWORD = "";
 
-    private static Connection connection = null;
-
-    public static Connection getConnection() {
-        try {
-            if (connection == null || connection.isClosed()) {
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                connection = DriverManager.getConnection(URL, USER, PASSWORD);
-            }
-        } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("DB Connection Error: " + e.getMessage());
+    static {
+        try { Class.forName("com.mysql.cj.jdbc.Driver"); }
+        catch (ClassNotFoundException e) {
+            System.err.println("MySQL Driver not found: " + e.getMessage());
         }
-        return connection;
     }
 
-    public static void closeConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            System.err.println("Close Connection Error: " + e.getMessage());
-        }
+    /**
+     * เปิด Connection ใหม่ทุกครั้ง — ใช้ใน try-with-resources
+     * แก้ปัญหา Singleton connection ที่ทำให้ autoCommit ค้าง
+     */
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }

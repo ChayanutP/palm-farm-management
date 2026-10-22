@@ -54,7 +54,6 @@ public class ResourceViewController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
         setupTaskTable();
         setupResourceTable();
         setupReservationTable();
@@ -71,7 +70,7 @@ public class ResourceViewController implements Initializable {
         colTaskDesc.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getDescription(d.getValue())));
         colTaskDept.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.task().getDepartment(d.getValue())));
+            new SimpleStringProperty(ctrl.task().getDepartmentDisplay(d.getValue())));
         colTaskStatus.setCellValueFactory(d ->
             new javafx.beans.property.SimpleStringProperty(ctrl.task().getCompleteStatusDisplay(d.getValue())));
         colTaskDeadline.setCellValueFactory(d ->
@@ -102,8 +101,9 @@ public class ResourceViewController implements Initializable {
 
     private void setupComboBoxes() {
         cbTaskDept.setItems(FXCollections.observableArrayList(
-            "RESOURCE","PALM_CARE","QUALITY","ACCOUNTING","HARVEST"));
-        cbResType.setItems(FXCollections.observableArrayList("VEHICLE","EQUIPMENT","OTHER"));
+            "RESOURCE","PALM_CARE","QUALITY","ACCOUNTING","HARVEST","CUTTING"));
+        // ตัด OTHER ออกเพื่อให้ตรงกับ ENUM('VEHICLE', 'EQUIPMENT') ตาม ER Diagram
+        cbResType.setItems(FXCollections.observableArrayList("VEHICLE","EQUIPMENT"));
     }
 
     //  Load 
@@ -160,8 +160,9 @@ public class ResourceViewController implements Initializable {
             lblResMsg.setText("กรุณากรอกชื่อและประเภท"); return;
         }
         ResourceModel r = ctrl.resource().createEmpty();
-        ctrl.resource().setResourceName(r, txtResName.getText().trim());
+        // ต้องตั้งค่า Type ก่อน Name เพื่อให้ ResourceModelController แยกใส่ฟิลด์ลูกได้ถูกตาราง
         ctrl.resource().setResourceType(r, cbResType.getValue());
+        ctrl.resource().setResourceName(r, txtResName.getText().trim());
 
         ctrl.addResource(r);
         lblResMsg.setText(ctrl.getSuccessMessage().isEmpty() ? ctrl.getErrorMessage() : ctrl.getSuccessMessage());

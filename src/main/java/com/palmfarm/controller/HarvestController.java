@@ -29,7 +29,7 @@ public class HarvestController {
             SELECT t.*, p.name AS plantation_name
             FROM task t
             LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-            WHERE t.department = ? AND t.is_complete = FALSE
+            WHERE t.department = ? AND t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE
             ORDER BY t.deadline ASC
             """;
         try (Connection con = DBConnection.getConnection();
@@ -45,12 +45,13 @@ public class HarvestController {
 
     public List<ReservationLineModel> getReservationsForTask(int taskId) {
         List<ReservationLineModel> list = new ArrayList<>();
-        String sql = """
-            SELECT rl.*, r.resource_name, r.resource_type
-            FROM reservation_line rl
-            JOIN resource r ON rl.resource_id = r.resource_id
-            WHERE rl.task_id = ?
-            """;
+        String sql = "SELECT rl.*, r.resource_type, " +
+                     "COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name " +
+                     "FROM reservation_line rl " +
+                     "JOIN resource r ON rl.resource_id = r.resource_id " +
+                     "LEFT JOIN vehicle v ON r.resource_id = v.resource_id " +
+                     "LEFT JOIN equipment e ON r.resource_id = e.resource_id " +
+                     "WHERE rl.task_id = ?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, taskId);

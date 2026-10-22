@@ -79,7 +79,7 @@ public class SchedulingViewController implements Initializable {
         colPlantation.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getPlantationName(d.getValue())));
         colDept.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.task().getDepartment(d.getValue())));
+            new SimpleStringProperty(ctrl.task().getDepartmentDisplay(d.getValue())));
         colComplete.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getCompleteStatusDisplay(d.getValue())));
         colOrdered.setCellValueFactory(d ->
@@ -139,9 +139,20 @@ public class SchedulingViewController implements Initializable {
         lblNew.setStyle("-fx-text-fill: #ccddcc; -fx-font-size: 12px;");
 
         // reqSchedule() — ปฏิทินให้เลือกวัน
-        DatePicker datePicker = new DatePicker(initDate);
+        LocalDate minDeadline = LocalDate.now().plusDays(10);
+        // ถ้า deadline ปัจจุบันยังอยู่ในอนาคตมากกว่า min ให้ใช้ค่าเดิม มิฉะนั้นใช้ min
+        LocalDate pickerInit = initDate.isAfter(minDeadline) ? initDate : minDeadline;
+        DatePicker datePicker = new DatePicker(pickerInit);
         datePicker.setStyle("-fx-background-color: #2d3e2d;");
         datePicker.setPrefWidth(220);
+        // ห้ามเลือกวันที่น้อยกว่าวันนี้ + 10
+        datePicker.setDayCellFactory(picker -> new javafx.scene.control.DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isBefore(minDeadline));
+            }
+        });
 
         Label lblPopupMsg = new Label("");
         lblPopupMsg.setStyle("-fx-font-size: 11px;");
@@ -165,9 +176,9 @@ public class SchedulingViewController implements Initializable {
                 lblPopupMsg.setText("กรุณาเลือกวันที่");
                 return;
             }
-            if (!selected.isAfter(LocalDate.now().minusDays(1))) {
+            if (selected.isBefore(LocalDate.now().plusDays(10))) {
                 lblPopupMsg.setStyle("-fx-text-fill: #ff8888; -fx-font-size: 11px;");
-                lblPopupMsg.setText("Deadline ต้องเป็นวันนี้หรือหลังจากนี้");
+                lblPopupMsg.setText("Deadline ต้องห่างจากวันนี้อย่างน้อย 10 วัน");
                 return;
             }
 

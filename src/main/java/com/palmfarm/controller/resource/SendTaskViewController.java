@@ -81,7 +81,7 @@ public class SendTaskViewController implements Initializable {
         colTaskDesc.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getDescription(d.getValue())));
         colTaskDept.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.task().getDepartment(d.getValue())));
+            new SimpleStringProperty(ctrl.task().getDepartmentDisplay(d.getValue())));
         colTaskOrdered.setCellValueFactory(d ->
             new javafx.beans.property.SimpleStringProperty(ctrl.task().getOrderedStatusDisplay(d.getValue())));
         colTaskDeadline.setCellValueFactory(d ->
@@ -111,7 +111,7 @@ public class SendTaskViewController implements Initializable {
     private void displayTask(TaskModel t) {
         lblDetailId.setText("Task ID: " + ctrl.task().getTaskId(t));
         lblDetailDesc.setText(ctrl.task().getDescription(t));
-        lblDetailDept.setText("ฝ่าย: " + ctrl.task().getDepartment(t));
+        lblDetailDept.setText("ฝ่าย: " + ctrl.task().getDepartmentDisplay(t));
         lblDetailDeadline.setText("กำหนดส่ง: " + ctrl.task().getDeadline(t));
         lblDetailStatus.setText("สถานะงาน: " + ctrl.task().getCompleteStatusDisplay(t));
         lblDetailOrdered.setText("สถานะการส่ง: " + ctrl.task().getOrderedStatusDisplay(t));
@@ -122,8 +122,8 @@ public class SendTaskViewController implements Initializable {
         lblDetailDesc.setText("—");
         lblDetailDept.setText("ฝ่าย: —");
         lblDetailDeadline.setText("กำหนดส่ง: —");
-        lblDetailStatus.setText("สถานะงาน: —");
-        lblDetailOrdered.setText("สถานะการส่ง: —");
+        lblDetailStatus.setText("สถานะการดำเนินงาน: —");
+        lblDetailOrdered.setText("สถานะการมอบหมาย: —");
         btnSend.setDisable(true);
         selectedTask = null;
     }

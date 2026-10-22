@@ -49,7 +49,6 @@ public class ResourceController {
         return list;
     }
 
-    /** task ที่ยังไม่เสร็จทุกตัว — ใช้ในหน้า Scheduling */
     public List<TaskModel> getIncompleteTasks() {
         List<TaskModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
@@ -64,17 +63,26 @@ public class ResourceController {
         return list;
     }
 
-    /** task ล่าสุด 1 รายการต่อกลุ่ม (dept+plantation) — สำหรับหน้า CreateTask */
+    /**
+     * แสดง task ล่าสุด 1 รายการต่อกลุ่ม (department + plantation)
+     * เรียงด้วย is_complete ASC (FALSE=0 ก่อน), deadline DESC
+     * → งานค้างมาก่อนเสมอ ถ้าไม่มีงานค้างจึงแสดงงานเก่าที่ deadline ล่าสุด
+     */
     public List<TaskModel> getLatestTaskPerGroup() {
         List<TaskModel> list = new ArrayList<>();
         String sql = TASK_SELECT +
             "INNER JOIN (" +
-            " SELECT department, plantation_id, MAX(deadline) AS max_deadline" +
-            " FROM task GROUP BY department, plantation_id" +
-            ") latest" +
-            " ON  t.department    = latest.department" +
-            " AND t.plantation_id = latest.plantation_id" +
-            " AND t.deadline      = latest.max_deadline " +
+            "  SELECT task_id" +
+            "  FROM (" +
+            "    SELECT task_id," +
+            "           ROW_NUMBER() OVER (" +
+            "             PARTITION BY department, plantation_id" +
+            "             ORDER BY is_complete ASC, deadline DESC" +
+            "           ) AS rn" +
+            "    FROM task" +
+            "  ) ranked" +
+            "  WHERE rn = 1" +
+            ") chosen ON t.task_id = chosen.task_id " +
             "ORDER BY t.department, p.name";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -87,19 +95,40 @@ public class ResourceController {
         return list;
     }
 
-    /** task ที่ยังไม่ส่ง (is_ordered = false) */
+
+    /**
+     * Task ที่จัดสรรทรัพยากรได้:
+     * - is_complete = FALSE (ยังไม่เสร็จ)
+     * - is_ordered  = FALSE (ยังไม่ส่งงาน/มอบหมาย)
+     * task ที่ส่งงานไปแล้วหรือเสร็จแล้วจะไม่แสดง
+     */
+    public List<TaskModel> getAssignableTasks() {
+        List<TaskModel> list = new ArrayList<>();
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                 TASK_SELECT +
+                 "WHERE t.is_complete = FALSE " +
+                 "  AND t.is_ordered = FALSE " +
+                 "ORDER BY t.work_ordered_date ASC");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(taskMC.mapFromResultSet(rs));
+        } catch (SQLException e) {
+            errorMessage = "ดึงข้อมูล Task ไม่สำเร็จ: " + e.getMessage();
+        }
+        return list;
+    }
+
     public List<TaskModel> getUnorderedTasks() {
         List<TaskModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                 TASK_SELECT + "WHERE t.is_ordered = FALSE ORDER BY t.work_ordered_date ASC");
+                 TASK_SELECT + "WHERE t.is_ordered = FALSE AND t.is_allocated = TRUE ORDER BY t.work_ordered_date ASC");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(taskMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึงข้อมูล Task ไม่สำเร็จ: " + e.getMessage(); }
         return list;
     }
 
-    /** is_complete=FALSE, is_allocated=TRUE, is_ordered=FALSE — สำหรับหน้า Deallocate */
     public List<TaskModel> getAllocatedUnorderedTasks() {
         List<TaskModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
@@ -118,7 +147,6 @@ public class ResourceController {
         return list;
     }
 
-    /** สร้าง Task — ตรวจก่อนว่าแผนก+สวนยังมี task ที่ยังไม่เสร็จ */
     public boolean createTask(TaskModel t) {
         String checkSql = "SELECT COUNT(*) FROM task WHERE department=? AND plantation_id=? AND is_complete=FALSE";
         try (Connection con = DBConnection.getConnection();
@@ -159,11 +187,9 @@ public class ResourceController {
         } catch (SQLException e) { errorMessage = "อัปเดต Task ไม่สำเร็จ: " + e.getMessage(); return false; }
     }
 
-    /** เลื่อน deadline */
     public boolean updateDeadline(int taskId, String newDeadline) {
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(
-                 "UPDATE task SET deadline=? WHERE task_id=?")) {
+             PreparedStatement ps = con.prepareStatement("UPDATE task SET deadline=? WHERE task_id=?")) {
             ps.setString(1, newDeadline);
             ps.setInt(2, taskId);
             ps.executeUpdate();
@@ -175,7 +201,6 @@ public class ResourceController {
         }
     }
 
-    /** ส่งงาน: is_ordered = true */
     public boolean sendTask(int taskId) {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement("UPDATE task SET is_ordered=TRUE WHERE task_id=?")) {
@@ -186,43 +211,66 @@ public class ResourceController {
         } catch (SQLException e) { errorMessage = "ส่งงานไม่สำเร็จ: " + e.getMessage(); return false; }
     }
 
-    //  DEALLOCATE 
+    // DEALLOCATE 
     public boolean deallocateTask(int taskId) {
-        String sqlGetRes  = "SELECT resource_id FROM reservation_line WHERE task_id=?";
-        String sqlDelRl   = "DELETE FROM reservation_line WHERE task_id=?";
-        String sqlUpdRes  = "UPDATE resource SET status='available' WHERE resource_id=?";
-        String sqlUpdTask = "UPDATE task SET is_allocated=FALSE WHERE task_id=?";
+        // ใช้ INNER JOIN แทน Subquery เพื่อป้องกัน MySQL ล็อกตารางซ้อนกัน
+        String sqlUpdRes  = "UPDATE resource r " +
+                            "INNER JOIN reservation_line rl ON r.resource_id = rl.resource_id " +
+                            "SET r.status = 'available' " +
+                            "WHERE rl.task_id = ?";
+        String sqlDelRl   = "DELETE FROM reservation_line WHERE task_id = ?";
+        String sqlUpdTask = "UPDATE task SET is_allocated = FALSE WHERE task_id = ?";
+
         try (Connection con = DBConnection.getConnection()) {
             con.setAutoCommit(false);
             try {
-                List<Integer> rids = new ArrayList<>();
-                try (PreparedStatement ps = con.prepareStatement(sqlGetRes)) {
-                    ps.setInt(1, taskId); ResultSet rs = ps.executeQuery();
-                    while (rs.next()) rids.add(rs.getInt("resource_id"));
-                }
-                try (PreparedStatement ps = con.prepareStatement(sqlDelRl)) {
-                    ps.setInt(1, taskId); ps.executeUpdate();
-                }
-                try (PreparedStatement ps = con.prepareStatement(sqlUpdRes)) {
-                    for (int rid : rids) { ps.setInt(1, rid); ps.addBatch(); }
-                    ps.executeBatch();
-                }
-                try (PreparedStatement ps = con.prepareStatement(sqlUpdTask)) {
-                    ps.setInt(1, taskId); ps.executeUpdate();
-                }
-                con.commit();
-                successMessage = "ยกเลิกการจัดสรรสำเร็จ คืนทรัพยากร " + rids.size() + " รายการ";
-                return true;
-            } catch (SQLException e) { con.rollback(); throw e; }
-            finally { con.setAutoCommit(true); }
-        } catch (SQLException e) { errorMessage = "ยกเลิกการจัดสรรไม่สำเร็จ: " + e.getMessage(); return false; }
-    }
+                int releasedCount = 0;
 
-    //  RESOURCES 
+                try (PreparedStatement ps = con.prepareStatement(sqlUpdRes)) {
+                    ps.setQueryTimeout(5);
+                    ps.setInt(1, taskId);
+                    releasedCount = ps.executeUpdate();
+                }
+
+                try (PreparedStatement ps = con.prepareStatement(sqlDelRl)) {
+                    ps.setQueryTimeout(5);
+                    ps.setInt(1, taskId);
+                    ps.executeUpdate();
+                }
+
+                try (PreparedStatement ps = con.prepareStatement(sqlUpdTask)) {
+                    ps.setQueryTimeout(5);
+                    ps.setInt(1, taskId);
+                    ps.executeUpdate();
+                }
+
+                con.commit();
+                successMessage = "ยกเลิกการจัดสรรสำเร็จ คืนทรัพยากร " + releasedCount + " รายการ";
+                return true;
+
+            } catch (SQLException e) {
+                try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+                throw e;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            errorMessage = "ยกเลิกการจัดสรรไม่สำเร็จ: " + e.getMessage();
+            return false;
+        }
+    }
+    //  RESOURCES (JOIN Superclass + Subclasses)
+    private static final String RESOURCE_SELECT =
+        "SELECT r.resource_id, r.resource_type, r.status, " +
+        "       v.license_plate, v.vehicle_size, v.seat_count, " +
+        "       e.equip_id, e.equipment_name " +
+        "FROM resource r " +
+        "LEFT JOIN vehicle v ON r.resource_id = v.resource_id " +
+        "LEFT JOIN equipment e ON r.resource_id = e.resource_id ";
+
     public List<ResourceModel> getAllResources() {
         List<ResourceModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM resource ORDER BY resource_id");
+             PreparedStatement ps = con.prepareStatement(RESOURCE_SELECT + "ORDER BY r.resource_id");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(resourceMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึงข้อมูล Resource ไม่สำเร็จ: " + e.getMessage(); }
@@ -233,7 +281,7 @@ public class ResourceController {
         List<ResourceModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                 "SELECT * FROM resource WHERE status='available' ORDER BY resource_type,resource_name");
+                 RESOURCE_SELECT + "WHERE r.status='available' ORDER BY r.resource_type, r.resource_id");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(resourceMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึง Resource ว่างไม่สำเร็จ: " + e.getMessage(); }
@@ -241,21 +289,79 @@ public class ResourceController {
     }
 
     public boolean addResource(ResourceModel r) {
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(
-                 "INSERT INTO resource (resource_name,resource_type,status,description) VALUES (?,?,?,?)")) {
-            ps.setString(1, resourceMC.getResourceName(r)); ps.setString(2, resourceMC.getResourceType(r));
-            ps.setString(3, resourceMC.getStatus(r));       ps.setString(4, resourceMC.getDescription(r));
-            ps.executeUpdate(); successMessage = "เพิ่ม Resource สำเร็จ"; return true;
-        } catch (SQLException e) { errorMessage = "เพิ่ม Resource ไม่สำเร็จ: " + e.getMessage(); return false; }
+        String sqlRes = "INSERT INTO resource (resource_type, status) VALUES (?, ?)";
+        String sqlVeh = "INSERT INTO vehicle (resource_id, license_plate, vehicle_size, seat_count) VALUES (?, ?, ?, ?)";
+        String sqlEq  = "INSERT INTO equipment (resource_id, equip_id, equipment_name) VALUES (?, ?, ?)";
+
+        try (Connection con = DBConnection.getConnection()) {
+            con.setAutoCommit(false);
+            try (PreparedStatement psRes = con.prepareStatement(sqlRes, Statement.RETURN_GENERATED_KEYS)) {
+                String type   = resourceMC.getResourceType(r);
+                String status = resourceMC.getStatus(r) != null ? resourceMC.getStatus(r) : "available";
+
+                psRes.setString(1, type);
+                psRes.setString(2, status);
+                psRes.executeUpdate();
+
+                int newResourceId = -1;
+                try (ResultSet keys = psRes.getGeneratedKeys()) {
+                    if (keys.next()) newResourceId = keys.getInt(1);
+                }
+                if (newResourceId == -1) throw new SQLException("ไม่สามารถสร้างรหัส Resource ได้");
+
+                if ("VEHICLE".equalsIgnoreCase(type)) {
+                    try (PreparedStatement psVeh = con.prepareStatement(sqlVeh)) {
+                        String plate = resourceMC.getLicensePlate(r);
+                        if (plate == null || plate.isBlank()) plate = resourceMC.getResourceName(r);
+                        String size  = resourceMC.getVehicleSize(r);
+                        if (size == null || size.isBlank()) size = "ยานพาหนะทั่วไป";
+                        int seats    = resourceMC.getSeatCount(r) > 0 ? resourceMC.getSeatCount(r) : 2;
+
+                        psVeh.setInt(1, newResourceId);
+                        psVeh.setString(2, plate);
+                        psVeh.setString(3, size);
+                        psVeh.setInt(4, seats);
+                        psVeh.executeUpdate();
+                    }
+                } else {
+                    try (PreparedStatement psEq = con.prepareStatement(sqlEq)) {
+                        String eqId = resourceMC.getEquipId(r);
+                        if (eqId == null || eqId.isBlank()) eqId = String.format("EQ-%03d", newResourceId);
+                        String eqName = resourceMC.getEquipmentName(r);
+                        if (eqName == null || eqName.isBlank()) eqName = resourceMC.getResourceName(r);
+
+                        psEq.setInt(1, newResourceId);
+                        psEq.setString(2, eqId);
+                        psEq.setString(3, eqName);
+                        psEq.executeUpdate();
+                    }
+                }
+
+                con.commit();
+                successMessage = "เพิ่ม Resource สำเร็จ";
+                return true;
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            } finally {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            errorMessage = "เพิ่ม Resource ไม่สำเร็จ: " + e.getMessage();
+            return false;
+        }
     }
 
-    //  RESERVATION LINES 
+    //  RESERVATION LINES (ดึงชื่อจาก Subclass ด้วย COALESCE)
     public List<ReservationLineModel> getReservationsByTask(int taskId) {
         List<ReservationLineModel> list = new ArrayList<>();
-        String sql = "SELECT rl.*, r.resource_name, r.resource_type " +
+        String sql = "SELECT rl.*, " +
+                     "       COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name, " +
+                     "       r.resource_type " +
                      "FROM reservation_line rl " +
                      "JOIN resource r ON rl.resource_id = r.resource_id " +
+                     "LEFT JOIN vehicle v ON r.resource_id = v.resource_id " +
+                     "LEFT JOIN equipment e ON r.resource_id = e.resource_id " +
                      "WHERE rl.task_id = ?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -266,41 +372,65 @@ public class ResourceController {
     }
 
     public boolean assignResourcesToTask(int taskId, List<Integer> resourceIds) {
-        if (resourceIds.isEmpty()) { errorMessage = "กรุณาเลือกทรัพยากรอย่างน้อย 1 รายการ"; return false; }
-        String dateStr = java.time.LocalDate.now().toString();
-        try (Connection con = DBConnection.getConnection()) {
-            PreparedStatement dp = con.prepareStatement("SELECT deadline FROM task WHERE task_id=?");
-            dp.setInt(1, taskId); ResultSet dr = dp.executeQuery();
-            if (dr.next() && dr.getString("deadline") != null) dateStr = dr.getString("deadline");
-        } catch (SQLException ignored) {}
-        String sqlIns = "INSERT INTO reservation_line (task_id,resource_id,date,used_status,return_status) VALUES (?,?,?,'pending','not_returned')";
-        String sqlRes = "UPDATE resource SET status='reserved' WHERE resource_id=?";
+        if (resourceIds.isEmpty()) {
+            errorMessage = "กรุณาเลือกทรัพยากรอย่างน้อย 1 รายการ";
+            return false;
+        }
+        String sqlDate  = "SELECT deadline FROM task WHERE task_id=?";
+        String sqlIns   = "INSERT INTO reservation_line (task_id,resource_id,date,used_status,return_status) VALUES (?,?,?,'pending','not_returned')";
+        String sqlRes   = "UPDATE resource SET status='reserved' WHERE resource_id=?";
+        String sqlAlloc = "UPDATE task SET is_allocated=TRUE WHERE task_id=?";
+
         try (Connection con = DBConnection.getConnection()) {
             con.setAutoCommit(false);
-            try (PreparedStatement ins = con.prepareStatement(sqlIns);
-                 PreparedStatement upd = con.prepareStatement(sqlRes)) {
-                for (int rid : resourceIds) {
-                    ins.setInt(1, taskId); ins.setInt(2, rid); ins.setString(3, dateStr); ins.addBatch();
-                    upd.setInt(1, rid); upd.addBatch();
+            try {
+                String dateStr = java.time.LocalDate.now().toString();
+                try (PreparedStatement dp = con.prepareStatement(sqlDate)) {
+                    dp.setInt(1, taskId);
+                    try (ResultSet dr = dp.executeQuery()) {
+                        if (dr.next() && dr.getString("deadline") != null) {
+                            dateStr = dr.getString("deadline");
+                        }
+                    }
                 }
-                ins.executeBatch(); upd.executeBatch();
-                // ตั้ง is_allocated = TRUE เมื่อจัดสรรแล้ว
-                try (java.sql.PreparedStatement pa = con.prepareStatement(
-                        "UPDATE task SET is_allocated=TRUE WHERE task_id=?")) {
-                    pa.setInt(1, taskId); pa.executeUpdate();
+
+                try (PreparedStatement ins = con.prepareStatement(sqlIns);
+                     PreparedStatement upd = con.prepareStatement(sqlRes);
+                     PreparedStatement pa  = con.prepareStatement(sqlAlloc)) {
+                    for (int rid : resourceIds) {
+                        ins.setInt(1, taskId);
+                        ins.setInt(2, rid);
+                        ins.setString(3, dateStr);
+                        ins.addBatch();
+
+                        upd.setInt(1, rid);
+                        upd.addBatch();
+                    }
+                    ins.executeBatch();
+                    upd.executeBatch();
+
+                    pa.setInt(1, taskId);
+                    pa.executeUpdate();
                 }
+
                 con.commit();
-                successMessage = "จัดสรรทรัพยากร " + resourceIds.size() + " รายการสำเร็จ"; return true;
-            } catch (SQLException e) { con.rollback(); throw e; }
-            finally { con.setAutoCommit(true); }
-        } catch (SQLException e) { errorMessage = "จัดสรรทรัพยากรไม่สำเร็จ: " + e.getMessage(); return false; }
+                successMessage = "จัดสรรทรัพยากร " + resourceIds.size() + " รายการสำเร็จ";
+                return true;
+            } catch (SQLException e) {
+                try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+                throw e;
+            }
+        } catch (SQLException e) {
+            errorMessage = "จัดสรรทรัพยากรไม่สำเร็จ: " + e.getMessage();
+            return false;
+        }
     }
 
     //  EMPLOYEES 
     public List<EmployeeModel> getAllEmployees() {
         List<EmployeeModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM employee ORDER BY department,employee_id");
+             PreparedStatement ps = con.prepareStatement("SELECT * FROM employee ORDER BY department, national_id");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(empMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึงข้อมูลพนักงานไม่สำเร็จ: " + e.getMessage(); }
@@ -310,7 +440,7 @@ public class ResourceController {
     public boolean addEmployee(EmployeeModel emp) {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                 "INSERT INTO employee (username,password,first_name,last_name,department,position,phone) VALUES (?,?,?,?,?,?,?)")) {
+                 "INSERT INTO employee (national_id,username,password,first_name,last_name,department,position,phone) VALUES (?,?,?,?,?,?,?,?)")) {
             ps.setString(1,empMC.getUsername(emp)); ps.setString(2,empMC.getPassword(emp));
             ps.setString(3,empMC.getFirstName(emp)); ps.setString(4,empMC.getLastName(emp));
             ps.setString(5,empMC.getDepartment(emp)); ps.setString(6,empMC.getPosition(emp));

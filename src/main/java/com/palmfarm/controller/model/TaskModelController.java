@@ -50,6 +50,20 @@ public class TaskModelController {
     // DISPLAY HELPERS — boolean → ข้อความไทย (ใช้ใน View เท่านั้น)
     // 
 
+    /** แปลงชื่อฝ่ายจาก DB → ภาษาไทยสำหรับแสดงผล */
+    public String getDepartmentDisplay(TaskModel t) {
+        if (t.department == null) return "";
+        return switch (t.department.toUpperCase()) {
+            case "RESOURCE"   -> "ฝ่ายจัดสรรทรัพยากร";
+            case "PALM_CARE"  -> "ฝ่ายดูแล";
+            case "QUALITY"    -> "ฝ่ายตรวจสอบคุณภาพ";
+            case "ACCOUNTING" -> "ฝ่ายบัญชี";
+            case "HARVEST"    -> "ฝ่ายเก็บเกี่ยว/ขนส่ง";
+            case "CUTTING"    -> "ฝ่ายตัด/ปลูก";
+            default           -> t.department;
+        };
+    }
+
     /** is_complete: false → "กำลังดำเนินการ" / true → "เสร็จสิ้น" */
     public String getCompleteStatusDisplay(TaskModel t) {
         return t.is_complete ? "เสร็จสิ้น" : "กำลังดำเนินการ";

@@ -1,65 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.palmfarm.controller.resource.DeallocateTaskViewController"
-            style="-fx-background-color: #1a2a1a;">
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane style="-fx-background-color: #1a2a1a;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.palmfarm.controller.resource.DeallocateTaskViewController">
     <center>
         <VBox spacing="8" style="-fx-padding: 15;">
 
-            <HBox spacing="8" alignment="CENTER_LEFT">
-                <Label text="Task ที่จัดสรรแล้ว (ยังไม่ส่งงาน):"
-                       style="-fx-text-fill: #aaccaa; -fx-font-weight: bold;"/>
-                <Button text="รีเฟรช" onAction="#handleRefresh"
-                        style="-fx-background-color: #2196F3; -fx-text-fill: white;
-                               -fx-cursor: hand; -fx-padding: 5 12;"/>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label style="-fx-text-fill: #aaccaa; -fx-font-weight: bold;" text="ใบสั่งงานที่จัดสรรแล้ว (ยังไม่ได้มอบหมาย):" />
+                <Button onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white;                                -fx-cursor: hand; -fx-padding: 5 12;" text="รีเฟรช" />
             </HBox>
 
-            <TableView fx:id="tableTask" VBox.vgrow="ALWAYS" prefHeight="280"
-                       style="-fx-background-color: #243224; -fx-control-inner-background: #243224;">
+            <TableView fx:id="tableTask" prefHeight="280" style="-fx-background-color: #243224; -fx-control-inner-background: #243224;" VBox.vgrow="ALWAYS">
                 <columns>
-                    <TableColumn fx:id="colTaskId"         text="ID"          prefWidth="55"/>
-                    <TableColumn fx:id="colTaskDesc"       text="คำอธิบาย"    prefWidth="260"/>
-                    <TableColumn fx:id="colTaskPlantation" text="สวนปาล์ม"    prefWidth="130"/>
-                    <TableColumn fx:id="colTaskDept"       text="ฝ่าย"         prefWidth="120"/>
-                    <TableColumn fx:id="colTaskDeadline"   text="กำหนดส่ง"    prefWidth="120"/>
-                    <TableColumn fx:id="colTaskAllocated"  text="สถานะจัดสรร"  prefWidth="130"/>
+                    <TableColumn fx:id="colTaskId" prefWidth="55" text="ID" />
+                    <TableColumn fx:id="colTaskDesc" prefWidth="260" text="คำอธิบาย" />
+                    <TableColumn fx:id="colTaskPlantation" prefWidth="130" text="สวนปาล์ม" />
+                    <TableColumn fx:id="colTaskDept" prefWidth="120" text="ฝ่าย" />
+                    <TableColumn fx:id="colTaskDeadline" prefWidth="120" text="กำหนดส่ง" />
+                    <TableColumn fx:id="colTaskAllocated" prefWidth="130" text="สถานะจัดสรร" />
                 </columns>
                 <placeholder>
-                    <Label text="ไม่มี Task ที่จัดสรรแล้วและรอมอบหมาย"
-                           style="-fx-text-fill: #88aa88;"/>
+                    <Label style="-fx-text-fill: #88aa88;" text="ไม่มีใบสั่งงาน ที่จัดสรรแล้วและรอมอบหมาย" />
                 </placeholder>
             </TableView>
 
-            <Label text="ทรัพยากรที่จัดสรรให้ Task นี้:"
-                   style="-fx-text-fill: #aaccaa; -fx-font-weight: bold;"/>
+            <Label style="-fx-text-fill: #aaccaa; -fx-font-weight: bold;" text="ทรัพยากรที่จัดสรรให้ใบสั่งงานนี้:" />
 
-            <TableView fx:id="tableReservation" VBox.vgrow="ALWAYS" prefHeight="200"
-                       style="-fx-background-color: #243224; -fx-control-inner-background: #243224;">
+            <TableView fx:id="tableReservation" prefHeight="200" style="-fx-background-color: #243224; -fx-control-inner-background: #243224;" VBox.vgrow="ALWAYS">
                 <columns>
-                    <TableColumn fx:id="colRlId"       text="ID"        prefWidth="55"/>
-                    <TableColumn fx:id="colRlResource" text="ทรัพยากร"   prefWidth="220"/>
-                    <TableColumn fx:id="colRlType"     text="ประเภท"     prefWidth="120"/>
-                    <TableColumn fx:id="colRlDate"     text="วันที่จอง"  prefWidth="130"/>
-                    <TableColumn fx:id="colRlStatus"   text="สถานะ"      prefWidth="110"/>
+                    <TableColumn fx:id="colRlId" prefWidth="55" text="ID" />
+                    <TableColumn fx:id="colRlResource" prefWidth="231.9999885559082" text="ทรัพยากร" />
+                    <TableColumn fx:id="colRlType" prefWidth="147.20001220703125" text="ประเภท" />
+                    <TableColumn fx:id="colRlDate" prefWidth="197.5999755859375" text="วันที่จอง" />
+                    <TableColumn fx:id="colRlStatus" prefWidth="185.60003662109375" text="สถานะ" />
                 </columns>
                 <placeholder>
-                    <Label text="เลือก Task เพื่อดูทรัพยากรที่จัดสรร"
-                           style="-fx-text-fill: #88aa88;"/>
+                    <Label style="-fx-text-fill: #88aa88;" text="เลือกใบสั่งงาน เพื่อดูทรัพยากรที่จัดสรร" />
                 </placeholder>
             </TableView>
 
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Button fx:id="btnDeallocate"
-                        text="ยกเลิกการจัดสรรทรัพยากร"
-                        onAction="#handleDeallocate" disable="true"
-                        style="-fx-background-color: #c0392b; -fx-text-fill: white;
-                               -fx-font-size: 13px; -fx-font-weight: bold;
-                               -fx-cursor: hand; -fx-padding: 8 18; -fx-background-radius: 6;"/>
-                <Label fx:id="lblMsg" text="" wrapText="true"
-                       style="-fx-font-size: 12px;"/>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Button fx:id="btnDeallocate" disable="true" onAction="#handleDeallocate" style="-fx-background-color: #c0392b; -fx-text-fill: white;                                -fx-font-size: 13px; -fx-font-weight: bold;                                -fx-cursor: hand; -fx-padding: 8 18; -fx-background-radius: 6;" text="ยกเลิกการจัดสรรทรัพยากร" />
+                <Label fx:id="lblMsg" style="-fx-font-size: 12px;" text="" wrapText="true" />
             </HBox>
 
         </VBox>

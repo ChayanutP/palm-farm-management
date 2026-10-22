@@ -61,7 +61,7 @@
               <TableColumn fx:id="colRlStatus" prefWidth="90" text="สถานะ" />
             </columns>
             <placeholder>
-              <Label style="-fx-text-fill:#88aa88;" text="เลือก Task เพื่อดูรายการ" />
+              <Label style="-fx-text-fill:#88aa88;" text="เลือกใบสั่งงานเพื่อดูรายการ" />
             </placeholder>
           </TableView>
         </VBox>

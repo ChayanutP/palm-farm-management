@@ -14,6 +14,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 public class CreateTaskViewController implements Initializable {
@@ -37,8 +38,15 @@ public class CreateTaskViewController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
+        // แสดงภาษาไทยใน ComboBox แต่ map กลับเป็น DB value ตอน save
         cbDept.setItems(FXCollections.observableArrayList(
-            "RESOURCE","PALM_CARE","QUALITY","ACCOUNTING","HARVEST","CUTTING"));
+            "ฝ่ายจัดสรรทรัพยากร",
+            "ฝ่ายดูแล",
+            "ฝ่ายตรวจสอบคุณภาพ",
+            "ฝ่ายบัญชี",
+            "ฝ่ายเก็บเกี่ยว/ขนส่ง",
+            "ฝ่ายตัด/ปลูก"
+        ));
 
         cbPlantation.setItems(FXCollections.observableArrayList(ctrl.getAllPlantations()));
         cbPlantation.setConverter(new javafx.util.StringConverter<>() {
@@ -50,6 +58,17 @@ public class CreateTaskViewController implements Initializable {
 
         setupTable();
         loadTasks();
+
+        // ห้ามเลือก deadline ที่น้อยกว่าวันนี้ + 10 วัน
+        LocalDate minDeadline = LocalDate.now().plusDays(10);
+        dpDeadline.setDayCellFactory(picker -> new javafx.scene.control.DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isBefore(minDeadline));
+            }
+        });
+        dpDeadline.setValue(minDeadline); // default = วันนี้ + 10
     }
 
     private void setupTable() {
@@ -60,7 +79,7 @@ public class CreateTaskViewController implements Initializable {
         colPlantation.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getPlantationName(d.getValue())));
         colDept.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.task().getDepartment(d.getValue())));
+            new SimpleStringProperty(ctrl.task().getDepartmentDisplay(d.getValue())));
         // ใช้ display helper — แสดงชื่อสถานะแทนค่า raw
         colStatus.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.task().getCompleteStatusDisplay(d.getValue())));
@@ -91,9 +110,16 @@ public class CreateTaskViewController implements Initializable {
             return;
         }
 
+        // ตรวจ deadline ต้อง >= วันนี้ + 10
+        if (dpDeadline.getValue().isBefore(LocalDate.now().plusDays(10))) {
+            lblMsg.setStyle("-fx-text-fill: #ff8888;");
+            lblMsg.setText("Deadline ต้องห่างจากวันนี้อย่างน้อย 10 วัน");
+            return;
+        }
+
         TaskModel t = ctrl.task().createEmpty();
         ctrl.task().setDescription(t,  txtDescription.getText().trim());
-        ctrl.task().setDepartment(t,   cbDept.getValue());
+        ctrl.task().setDepartment(t,   toDbDepartment(cbDept.getValue()));
         ctrl.task().setPlantationId(t, ctrl.plantation().getPlantationId(cbPlantation.getValue()));
         ctrl.task().setDeadline(t,     dpDeadline.getValue().toString());
 
@@ -109,6 +135,20 @@ public class CreateTaskViewController implements Initializable {
             dpDeadline.setValue(null);
         }
         loadTasks();
+    }
+
+
+    /** แปลงชื่อฝ่ายภาษาไทย → DB value */
+    private String toDbDepartment(String display) {
+        return switch (display) {
+            case "ฝ่ายจัดสรรทรัพยากร"   -> "RESOURCE";
+            case "ฝ่ายดูแล"              -> "PALM_CARE";
+            case "ฝ่ายตรวจสอบคุณภาพ"   -> "QUALITY";
+            case "ฝ่ายบัญชี"             -> "ACCOUNTING";
+            case "ฝ่ายเก็บเกี่ยว/ขนส่ง" -> "HARVEST";
+            case "ฝ่ายตัด/ปลูก"          -> "CUTTING";
+            default                      -> display;
+        };
     }
 
     @FXML public void handleRefresh(ActionEvent e) { loadTasks(); }

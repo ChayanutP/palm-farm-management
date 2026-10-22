@@ -66,7 +66,7 @@ public class AssignResourceViewController implements Initializable {
 
     //  Task ComboBox 
     private void setupTaskCombo() {
-        var tasks = ctrl.getAllTasks();
+        var tasks = ctrl.getAssignableTasks();
         cbTask.setItems(FXCollections.observableArrayList(tasks));
         cbTask.setConverter(new javafx.util.StringConverter<>() {
             public String toString(TaskModel t) {
@@ -186,7 +186,7 @@ public class AssignResourceViewController implements Initializable {
 
     private void refreshTaskCombo() {
         TaskModel prev = selectedTask;
-        var tasks = ctrl.getAllTasks();
+        var tasks = ctrl.getAssignableTasks();
         cbTask.setItems(FXCollections.observableArrayList(tasks));
         // คืน selection เดิมถ้ายังมีอยู่
         if (prev != null) {
