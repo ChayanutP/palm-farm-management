@@ -1,71 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
-
-<BorderPane style="-fx-background-color: #1a2a1a;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.palmfarm.controller.resource.SendTaskViewController">
-
-    <!-- MAIN CONTENT -->
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.palmfarm.controller.resource.SendTaskViewController"
+            style="-fx-background-color: #1a2a1a;">
     <center>
-        <HBox spacing="15" style="-fx-padding: 15;">
+        <VBox spacing="8" style="-fx-padding: 15;">
 
-            <!-- ซ้าย: ตาราง task ที่ยังไม่ส่ง -->
-            <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="ใบสั่งงานที่ยังไม่ได้มอบหมาย:"
+                       style="-fx-text-fill: #aaccaa; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                <Button text="รีเฟรช" onAction="#handleRefresh"
+                        style="-fx-background-color: #2196F3; -fx-text-fill: white;
+                               -fx-cursor: hand; -fx-padding: 5 12;"/>
+            </HBox>
 
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label style="-fx-text-fill: #aaccaa; -fx-font-weight: bold; -fx-font-size: 13px;" text="ใบสังงานที่ยังไม่ได้มอบหมาย:" />
-                    <Button onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white;                                    -fx-cursor: hand; -fx-padding: 5 12;" text="รีเฟรช" />
-                </HBox>
+            <TableView fx:id="tableTask" VBox.vgrow="ALWAYS"
+                       style="-fx-background-color: #243224; -fx-control-inner-background: #243224;">
+                <columns>
+                    <TableColumn fx:id="colTaskId"          text="ID"               prefWidth="55"/>
+                    <TableColumn fx:id="colTaskDesc"         text="คำอธิบาย"         prefWidth="240"/>
+                    <TableColumn fx:id="colTaskPlantation"   text="สวนปาล์ม"         prefWidth="130"/>
+                    <TableColumn fx:id="colTaskDept"         text="ฝ่าย"              prefWidth="130"/>
+                    <TableColumn fx:id="colTaskOrdered"      text="สถานะการมอบหมาย"  prefWidth="145"/>
+                    <TableColumn fx:id="colTaskDeadline"     text="กำหนดส่ง"          prefWidth="115"/>
+                    <TableColumn fx:id="colTaskDate"         text="วันที่สร้าง"        prefWidth="115"/>
+                </columns>
+                <placeholder>
+                    <Label text="ไม่มีใบสั่งงานที่ยังไม่ได้มอบหมาย"
+                           style="-fx-text-fill: #88aa88;"/>
+                </placeholder>
+            </TableView>
 
-                <TableView fx:id="tableTask" style="-fx-background-color: #243224;                                   -fx-control-inner-background: #243224;" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="colTaskId" prefWidth="55" text="ID" />
-                        <TableColumn fx:id="colTaskDesc" prefWidth="260" text="คำอธิบาย" />
-                        <TableColumn fx:id="colTaskDept" prefWidth="108.0" text="ฝ่าย" />
-                        <TableColumn fx:id="colTaskOrdered" prefWidth="117.5999755859375" text="สถานะการมอบหมาย" />
-                        <TableColumn fx:id="colTaskDeadline" prefWidth="115" text="กำหนดส่ง" />
-                        <TableColumn fx:id="colTaskDate" prefWidth="115" text="วันที่สร้าง" />
-                    </columns>
-                    <placeholder>
-                        <Label style="-fx-text-fill: #88aa88;" text="ไม่มีใบสั่งงานที่ยังไม่ได้มอบหมาย" />
-                    </placeholder>
-                </TableView>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button fx:id="btnSend" text="มอบหมายงาน"
+                        onAction="#handleSendTask" disable="true"
+                        style="-fx-background-color: #4CAF50; -fx-text-fill: white;
+                               -fx-font-size: 13px; -fx-font-weight: bold;
+                               -fx-cursor: hand; -fx-padding: 8 20; -fx-background-radius: 6;"/>
+                <Label fx:id="lblMsg" text="" wrapText="true"
+                       style="-fx-font-size: 12px;"/>
+            </HBox>
 
-            </VBox>
-
-            <!-- ขวา: panel รายละเอียด + ปุ่มส่ง -->
-            <VBox prefWidth="270" spacing="12" style="-fx-background-color: #243224; -fx-padding: 20;                          -fx-background-radius: 8;">
-
-                <Label style="-fx-text-fill: #4CAF50; -fx-font-weight: bold;                               -fx-font-size: 14px;" text="รายละเอียดใบสั่งงานที่เลือก" />
-
-                <Separator style="-fx-background-color: #3a5a3a;" />
-
-                <Label fx:id="lblDetailId" style="-fx-text-fill: #88cc88; -fx-font-size: 12px;" />
-                <Label fx:id="lblDetailDesc" style="-fx-text-fill: #ddeedd; -fx-font-size: 13px;                               -fx-font-weight: bold;" wrapText="true" />
-                <Label fx:id="lblDetailDept" style="-fx-text-fill: #aaccaa; -fx-font-size: 12px;" />
-                <Label fx:id="lblDetailDeadline" style="-fx-text-fill: #aaccaa; -fx-font-size: 12px;" />
-
-                <Separator style="-fx-background-color: #3a5a3a;" />
-
-                <Label fx:id="lblDetailStatus" style="-fx-text-fill: #aaccaa; -fx-font-size: 12px;" />
-                <Label fx:id="lblDetailOrdered" style="-fx-text-fill: #FFD700; -fx-font-size: 12px;                               -fx-font-weight: bold;" />
-
-                <Region VBox.vgrow="ALWAYS" />
-
-                <Button fx:id="btnSend" maxWidth="Infinity" onAction="#handleSendTask" style="-fx-background-color: #4CAF50; -fx-text-fill: white;                                -fx-font-size: 14px; -fx-font-weight: bold;                                -fx-cursor: hand; -fx-padding: 10;                                -fx-background-radius: 6;" text="มอบหมายงาน" />
-
-                <Label fx:id="lblMsg" style="-fx-text-fill: #88ff88; -fx-font-size: 12px;" text="" wrapText="true" />
-
-            </VBox>
-
-        </HBox>
+        </VBox>
     </center>
-
 </BorderPane>
