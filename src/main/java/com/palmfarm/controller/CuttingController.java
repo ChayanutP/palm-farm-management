@@ -27,7 +27,7 @@ public class CuttingController {
         List<TaskModel> list = new ArrayList<>();
         String dept = empMC.getDepartment(SessionManager.getCurrentUser());
         String sql = """
-            SELECT t.*, p.name AS plantation_name
+            SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, p.name AS plantation_name
             FROM task t
             LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
             WHERE t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.department = ? AND t.requisition_status = FALSE
@@ -48,7 +48,7 @@ public class CuttingController {
         List<TaskModel> list = new ArrayList<>();
         String dept = empMC.getDepartment(SessionManager.getCurrentUser());
         String sql = """
-            SELECT t.*, p.name AS plantation_name
+            SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, p.name AS plantation_name
             FROM task t
             LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
             WHERE t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.department = ? AND t.requisition_status = TRUE
@@ -67,7 +67,7 @@ public class CuttingController {
 
     public List<ReservationLineModel> getReservationsForTask(int taskId) {
         List<ReservationLineModel> list = new ArrayList<>();
-        String sql = "SELECT rl.*, r.resource_type, " +
+        String sql = "SELECT rl.reserved_id, rl.task_id, rl.resource_id, rl.date, rl.used_status, rl.return_status, r.resource_type, " +
                      "COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name " +
                      "FROM reservation_line rl " +
                      "JOIN resource r ON rl.resource_id = r.resource_id " +

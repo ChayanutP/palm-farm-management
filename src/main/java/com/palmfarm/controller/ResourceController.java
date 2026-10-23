@@ -32,7 +32,9 @@ public class ResourceController {
 
     //  TASKS 
     private static final String TASK_SELECT =
-        "SELECT t.*, p.name AS plantation_name " +
+        "SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, " +
+        "t.is_ordered, t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, " +
+        "p.name AS plantation_name " +
         "FROM task t " +
         "LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id ";
 
@@ -355,7 +357,7 @@ public class ResourceController {
     //  RESERVATION LINES (ดึงชื่อจาก Subclass ด้วย COALESCE)
     public List<ReservationLineModel> getReservationsByTask(int taskId) {
         List<ReservationLineModel> list = new ArrayList<>();
-        String sql = "SELECT rl.*, " +
+        String sql = "SELECT rl.reserved_id, rl.task_id, rl.resource_id, rl.date, rl.used_status, rl.return_status, " +
                      "       COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name, " +
                      "       r.resource_type " +
                      "FROM reservation_line rl " +
@@ -441,10 +443,11 @@ public class ResourceController {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
                  "INSERT INTO employee (national_id,username,password,first_name,last_name,department,position,phone) VALUES (?,?,?,?,?,?,?,?)")) {
-            ps.setString(1,empMC.getUsername(emp)); ps.setString(2,empMC.getPassword(emp));
-            ps.setString(3,empMC.getFirstName(emp)); ps.setString(4,empMC.getLastName(emp));
-            ps.setString(5,empMC.getDepartment(emp)); ps.setString(6,empMC.getPosition(emp));
-            ps.setString(7,empMC.getPhone(emp));
+            ps.setString(1,empMC.getNationalId(emp));
+            ps.setString(2,empMC.getUsername(emp)); ps.setString(3,empMC.getPassword(emp));
+            ps.setString(4,empMC.getFirstName(emp)); ps.setString(5,empMC.getLastName(emp));
+            ps.setString(6,empMC.getDepartment(emp)); ps.setString(7,empMC.getPosition(emp));
+            ps.setString(8,empMC.getPhone(emp));
             ps.executeUpdate(); successMessage = "เพิ่มพนักงานสำเร็จ"; return true;
         } catch (SQLException e) { errorMessage = "เพิ่มพนักงานไม่สำเร็จ: " + e.getMessage(); return false; }
     }
