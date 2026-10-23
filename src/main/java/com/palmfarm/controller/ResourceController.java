@@ -23,7 +23,7 @@ public class ResourceController {
     public List<PlantationModel> getAllPlantations() {
         List<PlantationModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM palm_plantation ORDER BY name");
+             PreparedStatement ps = con.prepareStatement("SELECT plantation_id, name, area_rai, location FROM palm_plantation ORDER BY name");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(plantationMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึงข้อมูลสวนไม่สำเร็จ: " + e.getMessage(); }
@@ -430,7 +430,7 @@ public class ResourceController {
     public List<EmployeeModel> getAllEmployees() {
         List<EmployeeModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM employee ORDER BY department, national_id");
+             PreparedStatement ps = con.prepareStatement("SELECT national_id, username, first_name, last_name, department, position, phone FROM employee ORDER BY department, national_id");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(empMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึงข้อมูลพนักงานไม่สำเร็จ: " + e.getMessage(); }

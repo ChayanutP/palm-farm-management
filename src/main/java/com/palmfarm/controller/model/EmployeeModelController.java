@@ -36,8 +36,6 @@ public class EmployeeModelController {
     public EmployeeModel mapFromResultSet(ResultSet rs) throws SQLException {
         EmployeeModel e = new EmployeeModel();
         e.national_id = rs.getString("national_id");
-        e.username    = rs.getString("username");
-        e.password    = rs.getString("password");
         e.first_name  = rs.getString("first_name");
         e.last_name   = rs.getString("last_name");
         e.department  = rs.getString("department");

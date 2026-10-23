@@ -14,7 +14,8 @@ public class LoginController {
     private String errorMessage = "";
 
     public boolean authenticate(String username, String password) {
-        String sql = "SELECT * FROM employee WHERE username = ? AND password = ?";
+        String sql = "SELECT national_id, username, first_name, last_name, department, position, phone " +
+                     "FROM employee WHERE username = ? AND password = ?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, username);

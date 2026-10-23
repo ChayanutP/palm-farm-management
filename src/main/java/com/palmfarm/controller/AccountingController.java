@@ -21,7 +21,7 @@ public class AccountingController {
 
     public List<BillModel> getUnstoredBills() {
         List<BillModel> list = new ArrayList<>();
-        String sql = "SELECT * FROM bills WHERE is_stored = FALSE ORDER BY uploaded_at DESC";
+        String sql = "SELECT bill_id, bill_number, bill_image_path, is_stored, sale_date, buyer_name, palm_quantity, price_per_unit, total_amount, plantation_id FROM bills WHERE is_stored = FALSE ORDER BY uploaded_at DESC";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -69,7 +69,7 @@ public class AccountingController {
 
     public List<BillModel> getStoredBills() {
         List<BillModel> list = new ArrayList<>();
-        String sql = "SELECT * FROM bills WHERE is_stored = TRUE ORDER BY uploaded_at DESC";
+        String sql = "SELECT bill_id, bill_number, bill_image_path, is_stored, sale_date, buyer_name, palm_quantity, price_per_unit, total_amount, plantation_id FROM bills WHERE is_stored = TRUE ORDER BY uploaded_at DESC";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
