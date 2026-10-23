@@ -234,19 +234,69 @@ VALUES
     ('ตัดปาล์มแปลง B รอบ ต.ค.',      'CUTTING',   FALSE, FALSE, FALSE, FALSE, '2026-10-23', '2026-11-08', 2, '1100100000001', NULL);
 
 -- 5. Reservation Lines
--- task 9  (HARVEST/แปลง A): เครื่องตัดปาล์ม X200-01 + รถกระบะ กข-5678
--- task 10 (PALM_CARE/แปลง B): สายยางรดน้ำ ชุด A
--- task 11 (HARVEST/แปลง B): รถบรรทุก 6 ล้อ กข-1234
--- task 12 (CUTTING/แปลง A): เครื่องตัดปาล์ม รุ่น X200 เลขที่ 02 + มีดตัดทะลาย ชุด 1
-INSERT INTO reservation_line (task_id, resource_id, date, status) VALUES
-(9,  9,  '2026-10-23', 'pending'),
-(9,  6,  '2026-10-23', 'pending'),
-(10, 13, '2026-10-23', 'pending'),
-(11, 1,  '2026-10-23', 'pending'),
-(12, 10, '2026-10-23', 'pending'),
-(12, 11, '2026-10-23', 'pending');
--- อัปเดตสถานะ resource ตามการจอง
-UPDATE resource SET status = 'reserved' WHERE resource_id IN (1, 6, 9, 10, 11, 13);
+-- ใช้ subquery เพื่อหา task_id จริง แทนการ hardcode
+-- Resource reference:
+--   VEHICLE  : 1=รถบรรทุก 6ล้อ กข-1234, 3=รถบรรทุก 10ล้อ งง-8899
+--              4=รถแทรกเตอร์ ตต-001, 6=รถกระบะ 4ประตู กข-5678, 7=รถกระบะ 2ประตู กข-9012
+--   EQUIPMENT: 9=เครื่องตัดปาล์ม X200-01, 10=เครื่องตัดปาล์ม X200-02
+--              11=มีดตัดทะลาย ชุด 1, 13=สายยางรดน้ำ ชุด A, 14=ปั๊มน้ำไฟฟ้า
+
+-- HARVEST/แปลง A (เก็บเกี่ยว): เครื่องตัดปาล์ม X200-01 + มีดตัดทะลาย ชุด 1 (ไม่มีรถ)
+INSERT INTO reservation_line (task_id, resource_id, date, status)
+SELECT t.task_id, 9, '2026-10-23', 'pending' FROM task t
+JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+WHERE t.description = 'เก็บเกี่ยวปาล์มรอบ ต.ค.' AND t.department = 'HARVEST' AND p.name = 'แปลงปาล์ม A' AND t.is_complete = FALSE;
+
+INSERT INTO reservation_line (task_id, resource_id, date, status)
+SELECT t.task_id, 11, '2026-10-23', 'pending' FROM task t
+JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+WHERE t.description = 'เก็บเกี่ยวปาล์มรอบ ต.ค.' AND t.department = 'HARVEST' AND p.name = 'แปลงปาล์ม A' AND t.is_complete = FALSE;
+
+-- PALM_CARE/แปลง B (รดน้ำใส่ปุ๋ย): สายยางรดน้ำ + ปั๊มน้ำไฟฟ้า
+INSERT INTO reservation_line (task_id, resource_id, date, status)
+SELECT t.task_id, 13, '2026-10-23', 'pending' FROM task t
+JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+WHERE t.description = 'รดน้ำและใส่ปุ๋ยปาล์มแปลง B' AND t.department = 'PALM_CARE' AND t.is_complete = FALSE;
+
+INSERT INTO reservation_line (task_id, resource_id, date, status)
+SELECT t.task_id, 14, '2026-10-23', 'pending' FROM task t
+JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+WHERE t.description = 'รดน้ำและใส่ปุ๋ยปาล์มแปลง B' AND t.department = 'PALM_CARE' AND t.is_complete = FALSE;
+
+-- HARVEST/แปลง B (ขนส่ง): รถบรรทุก 10ล้อ + รถกระบะ (ไม่มีเครื่องมือ)
+INSERT INTO reservation_line (task_id, resource_id, date, status)
+SELECT t.task_id, 3, '2026-10-23', 'pending' FROM task t
+JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+WHERE t.description = 'ขนส่งปาล์มแปลง B ไปโรงงาน' AND t.department = 'HARVEST' AND t.is_complete = FALSE;
+
+INSERT INTO reservation_line (task_id, resource_id, date, status)
+SELECT t.task_id, 7, '2026-10-23', 'pending' FROM task t
+JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+WHERE t.description = 'ขนส่งปาล์มแปลง B ไปโรงงาน' AND t.department = 'HARVEST' AND t.is_complete = FALSE;
+
+-- CUTTING/แปลง A (ตัดปาล์ม): เครื่องตัดปาล์ม X200-02 + มีดตัดทะลาย ชุด 2 + เลื่อยยนต์
+INSERT INTO reservation_line (task_id, resource_id, date, status)
+SELECT t.task_id, 10, '2026-10-23', 'pending' FROM task t
+JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+WHERE t.description = 'ตัดปาล์มแปลง A รอบ ต.ค.' AND t.department = 'CUTTING' AND t.is_complete = FALSE;
+
+INSERT INTO reservation_line (task_id, resource_id, date, status)
+SELECT t.task_id, 12, '2026-10-23', 'pending' FROM task t
+JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+WHERE t.description = 'ตัดปาล์มแปลง A รอบ ต.ค.' AND t.department = 'CUTTING' AND t.is_complete = FALSE;
+
+INSERT INTO reservation_line (task_id, resource_id, date, status)
+SELECT t.task_id, 16, '2026-10-23', 'pending' FROM task t
+JOIN palm_plantation p ON t.plantation_id = p.plantation_id
+WHERE t.description = 'ตัดปาล์มแปลง A รอบ ต.ค.' AND t.department = 'CUTTING' AND t.is_complete = FALSE;
+
+-- อัปเดต resource status ตามที่จองไว้
+UPDATE resource SET status = 'reserved' WHERE resource_id IN (3, 7, 9, 10, 11, 12, 13, 14, 16);
+
+-- อัปเดต task.is_allocated = TRUE สำหรับ task ที่มี reservation แล้ว
+UPDATE task SET is_allocated = TRUE WHERE task_id IN (
+    SELECT DISTINCT task_id FROM reservation_line
+);
 
 -- 6. Bills (เปลี่ยนจาก plantation_id เป็น stored_by ที่เชื่อมกับพนักงานบัญชี)
 -- ยังไม่จัดเก็บ (is_stored=FALSE, stored_by=NULL)
