@@ -7,6 +7,5 @@ public class ReservationLineModel {
     public String resource_name;
     public String resource_type;
     public String date;
-    public String used_status;      // pending / used / returned
-    public String return_status;
+    public String status;      // pending / used / returned
 }

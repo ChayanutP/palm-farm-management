@@ -59,8 +59,8 @@ public class CreateTaskViewController implements Initializable {
         setupTable();
         loadTasks();
 
-        // ห้ามเลือก deadline ที่น้อยกว่าวันนี้ + 10 วัน
-        LocalDate minDeadline = LocalDate.now().plusDays(10);
+        // ห้ามเลือก deadline ที่น้อยกว่าวันนี้ + 1 วัน เพื่อให้เวลาคนงานปฏิบัติ
+        LocalDate minDeadline = LocalDate.now().plusDays(1);
         dpDeadline.setDayCellFactory(picker -> new javafx.scene.control.DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
@@ -68,7 +68,7 @@ public class CreateTaskViewController implements Initializable {
                 setDisable(empty || date.isBefore(minDeadline));
             }
         });
-        dpDeadline.setValue(minDeadline); // default = วันนี้ + 10
+        dpDeadline.setValue(minDeadline); // default = วันนี้ + 1
     }
 
     private void setupTable() {

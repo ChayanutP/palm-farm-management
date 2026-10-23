@@ -9,7 +9,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HarvestController {
+
+public class HarvestController extends PalmCareController {
 
     private final TaskModelController            taskMC = new TaskModelController();
     private final ReservationLineModelController rlMC   = new ReservationLineModelController();
@@ -17,16 +18,11 @@ public class HarvestController {
 
     private String errorMessage   = "";
     private String successMessage = "";
-
-    // ============================================================
-    // TASKS
-    // ============================================================
-
-    public List<TaskModel> getHarvestTasks() {
+        public List<TaskModel> getHarvestTasks() {
         List<TaskModel> list = new ArrayList<>();
         String dept = empMC.getDepartment(SessionManager.getCurrentUser());
         String sql  = """
-            SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, p.name AS plantation_name
+            SELECT t.*, p.name AS plantation_name
             FROM task t
             LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
             WHERE t.department = ? AND t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.requisition_status = FALSE
@@ -43,11 +39,37 @@ public class HarvestController {
         return list;
     }
 
-    public List<TaskModel> getHarvestTasksForReturn() {
+
+    //     public boolean markResourcesUsed(int taskId) {
+    //     String sql1 = "UPDATE reservation_line SET used_status='used' WHERE task_id=?";
+    //     String sql2 = "UPDATE task SET requisition_status=TRUE WHERE task_id=?";
+    //     try (Connection con = DBConnection.getConnection()) {
+    //         con.setAutoCommit(false);
+    //         try (PreparedStatement ps1 = con.prepareStatement(sql1);
+    //              PreparedStatement ps2 = con.prepareStatement(sql2)) {
+    //             ps1.setInt(1, taskId); ps1.executeUpdate();
+    //             ps2.setInt(1, taskId); ps2.executeUpdate();
+    //             con.commit();
+    //             successMessage = "บันทึกการใช้ทรัพยากรสำเร็จ";
+    //             return true;
+    //         } catch (SQLException e) {
+    //             con.rollback(); throw e;
+    //         } finally {
+    //             con.setAutoCommit(true);
+    //         }
+    //     } catch (SQLException e) {
+    //         errorMessage = "บันทึกไม่สำเร็จ: " + e.getMessage();
+    //         return false;
+    //     }
+    // }
+
+    // หากในอนาคตฝ่ายตัด/ปลูกมีฟีเจอร์เฉพาะตัว ค่อยมาเขียนเมธอดเพิ่มในนี้ได้ครับ
+
+     public List<TaskModel> getHarvestTasksForReturn() {
         List<TaskModel> list = new ArrayList<>();
         String dept = empMC.getDepartment(SessionManager.getCurrentUser());
         String sql  = """
-            SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, p.name AS plantation_name
+            SELECT t.*, p.name AS plantation_name
             FROM task t
             LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
             WHERE t.department = ? AND t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.requisition_status = TRUE
@@ -63,92 +85,82 @@ public class HarvestController {
         }
         return list;
     }
-
-    public List<ReservationLineModel> getReservationsForTask(int taskId) {
-        List<ReservationLineModel> list = new ArrayList<>();
-        String sql = "SELECT rl.reserved_id, rl.task_id, rl.resource_id, rl.date, rl.used_status, rl.return_status, r.resource_type, " +
-                     "COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name " +
-                     "FROM reservation_line rl " +
-                     "JOIN resource r ON rl.resource_id = r.resource_id " +
-                     "LEFT JOIN vehicle v ON r.resource_id = v.resource_id " +
-                     "LEFT JOIN equipment e ON r.resource_id = e.resource_id " +
-                     "WHERE rl.task_id = ?";
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, taskId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) list.add(rlMC.mapFromResultSet(rs));
-        } catch (SQLException e) {
-            errorMessage = "ดึง Reservation ไม่สำเร็จ: " + e.getMessage();
-        }
-        return list;
-    }
-
-    public boolean markResourcesUsed(int taskId) {
-        String sql1 = "UPDATE reservation_line SET used_status='used' WHERE task_id=?";
-        String sql2 = "UPDATE task SET requisition_status=TRUE WHERE task_id=?";
-        try (Connection con = DBConnection.getConnection()) {
-            con.setAutoCommit(false);
-            try (PreparedStatement ps1 = con.prepareStatement(sql1);
-                 PreparedStatement ps2 = con.prepareStatement(sql2)) {
-                ps1.setInt(1, taskId); ps1.executeUpdate();
-                ps2.setInt(1, taskId); ps2.executeUpdate();
-                con.commit();
-                successMessage = "บันทึกการใช้ทรัพยากรสำเร็จ";
-                return true;
-            } catch (SQLException e) {
-                con.rollback(); throw e;
-            } finally {
-                con.setAutoCommit(true);
-            }
-        } catch (SQLException e) {
-            errorMessage = "บันทึกไม่สำเร็จ: " + e.getMessage();
-            return false;
-        }
-    }
-
-    public boolean completeTask(int taskId) {
-        String sql1 = "UPDATE task SET is_complete=TRUE WHERE task_id=?";
-        String sql2 = "UPDATE reservation_line SET return_status='returned' WHERE task_id=?";
-        String sql3 = """
-            UPDATE resource r
-            JOIN reservation_line rl ON r.resource_id = rl.resource_id
-            SET r.status = 'available' WHERE rl.task_id = ?
-            """;
-        try (Connection con = DBConnection.getConnection()) {
-            con.setAutoCommit(false);
-            try (PreparedStatement ps1 = con.prepareStatement(sql1);
-                 PreparedStatement ps2 = con.prepareStatement(sql2);
-                 PreparedStatement ps3 = con.prepareStatement(sql3)) {
-                ps1.setInt(1, taskId); ps1.executeUpdate();
-                ps2.setInt(1, taskId); ps2.executeUpdate();
-                ps3.setInt(1, taskId); ps3.executeUpdate();
-                con.commit();
-                successMessage = "บันทึกงานเสร็จสิ้นสำเร็จ";
-                return true;
-            } catch (SQLException e) {
-                con.rollback(); throw e;
-            } finally {
-                con.setAutoCommit(true);
-            }
-        } catch (SQLException e) {
-            errorMessage = "บันทึกไม่สำเร็จ: " + e.getMessage();
-            return false;
-        }
-    }
-
-    // ============================================================
-    // Exposed Model Controller Accessors
-    // ============================================================
-
-    public TaskModelController            task() { return taskMC; }
-    public ReservationLineModelController rl()   { return rlMC;   }
-
-    // ============================================================
-    // Messages
-    // ============================================================
-
-    public String getErrorMessage()   { return errorMessage; }
-    public String getSuccessMessage() { return successMessage; }
-    public void clearMessages()       { errorMessage = ""; successMessage = ""; }
 }
+// public class HarvestController {
+
+    
+
+//     // ============================================================
+//     // TASKS
+//     // ============================================================
+
+
+
+   
+
+//     public List<ReservationLineModel> getReservationsForTask(int taskId) {
+//         List<ReservationLineModel> list = new ArrayList<>();
+//         String sql = "SELECT rl.*, r.resource_type, " +
+//                      "COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name " +
+//                      "FROM reservation_line rl " +
+//                      "JOIN resource r ON rl.resource_id = r.resource_id " +
+//                      "LEFT JOIN vehicle v ON r.resource_id = v.resource_id " +
+//                      "LEFT JOIN equipment e ON r.resource_id = e.resource_id " +
+//                      "WHERE rl.task_id = ?";
+//         try (Connection con = DBConnection.getConnection();
+//              PreparedStatement ps = con.prepareStatement(sql)) {
+//             ps.setInt(1, taskId);
+//             ResultSet rs = ps.executeQuery();
+//             while (rs.next()) list.add(rlMC.mapFromResultSet(rs));
+//         } catch (SQLException e) {
+//             errorMessage = "ดึง Reservation ไม่สำเร็จ: " + e.getMessage();
+//         }
+//         return list;
+//     }
+
+
+//     public boolean completeTask(int taskId) {
+//         String sql1 = "UPDATE task SET is_complete=TRUE WHERE task_id=?";
+//         String sql2 = "UPDATE reservation_line SET return_status='returned' WHERE task_id=?";
+//         String sql3 = """
+//             UPDATE resource r
+//             JOIN reservation_line rl ON r.resource_id = rl.resource_id
+//             SET r.status = 'available' WHERE rl.task_id = ?
+//             """;
+//         try (Connection con = DBConnection.getConnection()) {
+//             con.setAutoCommit(false);
+//             try (PreparedStatement ps1 = con.prepareStatement(sql1);
+//                  PreparedStatement ps2 = con.prepareStatement(sql2);
+//                  PreparedStatement ps3 = con.prepareStatement(sql3)) {
+//                 ps1.setInt(1, taskId); ps1.executeUpdate();
+//                 ps2.setInt(1, taskId); ps2.executeUpdate();
+//                 ps3.setInt(1, taskId); ps3.executeUpdate();
+//                 con.commit();
+//                 successMessage = "บันทึกงานเสร็จสิ้นสำเร็จ";
+//                 return true;
+//             } catch (SQLException e) {
+//                 con.rollback(); throw e;
+//             } finally {
+//                 con.setAutoCommit(true);
+//             }
+//         } catch (SQLException e) {
+//             errorMessage = "บันทึกไม่สำเร็จ: " + e.getMessage();
+//             return false;
+//         }
+//     }
+
+//     // ============================================================
+//     // Exposed Model Controller Accessors
+//     // ============================================================
+
+//     public TaskModelController            task() { return taskMC; }
+//     public ReservationLineModelController rl()   { return rlMC;   }
+
+//     // ============================================================
+//     // Messages
+//     // ============================================================
+
+//     public String getErrorMessage()   { return errorMessage; }
+//     public String getSuccessMessage() { return successMessage; }
+//     public void clearMessages()       { errorMessage = ""; successMessage = ""; }
+// }

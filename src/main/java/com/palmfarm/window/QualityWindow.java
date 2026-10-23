@@ -2,7 +2,7 @@ package com.palmfarm.window;
 
 import com.palmfarm.controller.model.EmployeeModelController;
 import com.palmfarm.util.SessionManager;
-import com.palmfarm.window.quality.RecordInspectionWindow;
+//import com.palmfarm.window.quality.RecordInspectionWindow;
 import com.palmfarm.window.quality.ReturnResourceWindow;
 import com.palmfarm.window.quality.UseResourceWindow;
 import javafx.geometry.Insets;
@@ -31,15 +31,15 @@ public class QualityWindow {
             () -> new UseResourceWindow().show());
         Button btnReturn = menuButton("คืนทรัพยากร",
             () -> new ReturnResourceWindow().show());
-        Button btnRecord = menuButton("บันทึกการตรวจสอบต้นปาล์ม",
-            () -> new RecordInspectionWindow().show());
+        // Button btnRecord = menuButton("บันทึกการตรวจสอบต้นปาล์ม",
+        //     () -> new RecordInspectionWindow().show());
         Button btnLogout = menuButton("ออกจากระบบ", () -> {
             SessionManager.clearSession(); stage.close();
             new LoginWindow(new Stage()).show();
         });
         btnLogout.setStyle(btnLogout.getStyle() + "-fx-background-color:#c0392b;");
 
-        VBox root = new VBox(18, lblTitle, lblUser, btnUse, btnReturn, btnRecord, btnLogout);
+        VBox root = new VBox(18, lblTitle, lblUser, btnUse, btnReturn, btnLogout);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(40));
         root.setStyle("-fx-background-color:#1a2a1a;");

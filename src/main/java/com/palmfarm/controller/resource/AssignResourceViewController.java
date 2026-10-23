@@ -118,7 +118,7 @@ public class AssignResourceViewController implements Initializable {
         colRlDate.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.rl().getDate(d.getValue())));
         colRlStatus.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.rl().getUsedStatus(d.getValue())));
+            new SimpleStringProperty(ctrl.rl().getStatus(d.getValue())));
     }
 
     //  Load available resources 

@@ -96,7 +96,7 @@ public class ReturnResourceViewController implements Initializable {
             lblMsg.setText("งานนี้ยังไม่ได้รับการมอบหมาย ไม่สามารถเสร็จสิ้นได้");
             return;
         }
-                boolean ok = ctrl.completeTask(ctrl.task().getTaskId(selectedTask));
+                boolean ok = ctrl.completeTaskAndReturnResources(ctrl.task().getTaskId(selectedTask));
                 lblMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#ff8888;");
                 lblMsg.setText(ok ? ctrl.getSuccessMessage() : ctrl.getErrorMessage());
                 ctrl.clearMessages();

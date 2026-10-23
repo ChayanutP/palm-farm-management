@@ -1,35 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.palmfarm.controller.palmcare.ReturnResourceViewController"
             style="-fx-background-color:#1a2a1a;">
   <center>
     <VBox spacing="8" style="-fx-padding:15;">
+      
+      <!-- ส่วนหัวข้อและปุ่มรีเฟรช -->
       <HBox spacing="8" alignment="CENTER_LEFT">
         <Label text="งานที่ได้รับมอบหมาย:" style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;"/>
         <Button text="รีเฟรช" onAction="#handleRefresh"
                 style="-fx-background-color:#2196F3;-fx-text-fill:white;-fx-cursor:hand;"/>
       </HBox>
-      <TableView fx:id="tableAssigned" VBox.vgrow="ALWAYS" prefHeight="260"
+      
+      <!-- ตารางแสดง Task -->
+      <TableView fx:id="tableTask" VBox.vgrow="ALWAYS" prefHeight="260"
                  style="-fx-background-color:#243224;-fx-control-inner-background:#243224;">
         <columns>
-          <TableColumn fx:id="colAssignId"         text="ID"          prefWidth="55"/>
-          <TableColumn fx:id="colAssignDesc"        text="คำอธิบาย"    prefWidth="230"/>
-          <TableColumn fx:id="colAssignPlantation"  text="สวนปาล์ม"   prefWidth="130"/>
-          <TableColumn fx:id="colAssignStatus"      text="สถานะงาน"   prefWidth="145"/>
-          <TableColumn fx:id="colAssignOrdered"     text="สถานะมอบหมาย" prefWidth="145"/>
+          <TableColumn fx:id="colTaskId"         text="ID"           prefWidth="55"/>
+          <TableColumn fx:id="colTaskDesc"       text="คำอธิบาย"     prefWidth="200"/>
+          <TableColumn fx:id="colTaskPlantation" text="สวนปาล์ม"    prefWidth="120"/>
+          <TableColumn fx:id="colTaskStatus"     text="สถานะงาน"    prefWidth="130"/>
+          <TableColumn fx:id="colTaskOrdered"    text="สถานะมอบหมาย" prefWidth="130"/>
+          <TableColumn fx:id="colTaskDeadline"   text="กำหนดส่ง"     prefWidth="110"/>
         </columns>
         <placeholder><Label text="ไม่มีงาน" style="-fx-text-fill:#88aa88;"/></placeholder>
       </TableView>
+      
+      <!-- ตารางแสดงรายการทรัพยากร -->
       <Label text="อุปกรณ์ที่เบิกยืม:" style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;"/>
-      <TableView fx:id="tableReturn" VBox.vgrow="ALWAYS" prefHeight="160"
+      <TableView fx:id="tableReservation" VBox.vgrow="ALWAYS" prefHeight="160"
                  style="-fx-background-color:#243224;-fx-control-inner-background:#243224;">
         <columns>
-          <TableColumn fx:id="colRetName"   text="ทรัพยากร"    prefWidth="220"/>
-          <TableColumn fx:id="colRetReturn" text="สถานะการคืน" prefWidth="180"/>
+          <TableColumn fx:id="colRlName"   text="ทรัพยากร"     prefWidth="220"/>
+          <TableColumn fx:id="colRlType"   text="ประเภท"       prefWidth="120"/>
+          <TableColumn fx:id="colRlReturn" text="สถานะการคืน"  prefWidth="150"/>
         </columns>
+        <placeholder><Label text="ไม่มีรายการทรัพยากร" style="-fx-text-fill:#88aa88;"/></placeholder>
       </TableView>
+      
+      <!-- ส่วนปุ่ม Action และข้อความ -->
       <HBox spacing="10" alignment="CENTER_LEFT">
         <Button fx:id="btnComplete" text="ยืนยันเสร็จสิ้นและคืนทรัพยากร"
                 onAction="#handleCompleteTask" disable="true"
@@ -37,6 +49,7 @@
                        -fx-font-size:13px;-fx-cursor:hand;-fx-padding:8 16;"/>
         <Label fx:id="lblMsg" text="" style="-fx-font-size:12px;" wrapText="true"/>
       </HBox>
+
     </VBox>
   </center>
 </BorderPane>

@@ -3,6 +3,7 @@ package com.palmfarm.controller;
 import com.palmfarm.controller.model.*;
 import com.palmfarm.model.*;
 import com.palmfarm.util.DBConnection;
+import com.palmfarm.util.SessionManager;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -19,11 +20,19 @@ public class ResourceController {
     private String errorMessage   = "";
     private String successMessage = "";
 
+    // Helper: ดึง national_id ของผู้ใช้ปัจจุบันจาก SessionManager
+    private String getCurrentUserNationalId(Connection con) {
+    EmployeeModel user = SessionManager.getCurrentUser();
+    if (user == null) return null;
+
+    return user.national_id; // หรือชื่อเมธอด getter ใน EmployeeModel เช่น user.getNational_id()
+}
+
     //  PLANTATION 
     public List<PlantationModel> getAllPlantations() {
         List<PlantationModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT plantation_id, name, area_rai, location FROM palm_plantation ORDER BY name");
+             PreparedStatement ps = con.prepareStatement("SELECT * FROM palm_plantation ORDER BY name");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(plantationMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึงข้อมูลสวนไม่สำเร็จ: " + e.getMessage(); }
@@ -32,9 +41,7 @@ public class ResourceController {
 
     //  TASKS 
     private static final String TASK_SELECT =
-        "SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, " +
-        "t.is_ordered, t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, " +
-        "p.name AS plantation_name " +
+        "SELECT t.*, p.name AS plantation_name " +
         "FROM task t " +
         "LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id ";
 
@@ -97,13 +104,6 @@ public class ResourceController {
         return list;
     }
 
-
-    /**
-     * Task ที่จัดสรรทรัพยากรได้:
-     * - is_complete = FALSE (ยังไม่เสร็จ)
-     * - is_ordered  = FALSE (ยังไม่ส่งงาน/มอบหมาย)
-     * task ที่ส่งงานไปแล้วหรือเสร็จแล้วจะไม่แสดง
-     */
     public List<TaskModel> getAssignableTasks() {
         List<TaskModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
@@ -151,34 +151,46 @@ public class ResourceController {
 
     public boolean createTask(TaskModel t) {
         String checkSql = "SELECT COUNT(*) FROM task WHERE department=? AND plantation_id=? AND is_complete=FALSE";
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement chk = con.prepareStatement(checkSql)) {
-            chk.setString(1, taskMC.getDepartment(t));
-            chk.setInt(2, taskMC.getPlantationId(t));
-            ResultSet rs = chk.executeQuery();
-            if (rs.next() && rs.getInt(1) > 0) {
-                errorMessage = "ยังมีงานที่ยังไม่เสร็จอยู่ในแผนกนี้และสวนนี้ กรุณาเสร็จสิ้นงานเดิมก่อน";
-                return false;
+        try (Connection con = DBConnection.getConnection()) {
+            try (PreparedStatement chk = con.prepareStatement(checkSql)) {
+                chk.setString(1, taskMC.getDepartment(t));
+                chk.setInt(2, taskMC.getPlantationId(t));
+                try (ResultSet rs = chk.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        errorMessage = "ยังมีงานที่ยังไม่เสร็จอยู่ในแผนกนี้และสวนนี้ กรุณาเสร็จสิ้นงานเดิมก่อน";
+                        return false;
+                    }
+                }
             }
-        } catch (SQLException e) { errorMessage = "ตรวจสอบข้อมูลไม่สำเร็จ: " + e.getMessage(); return false; }
 
-        String sql = "INSERT INTO task (description,department,is_complete,is_allocated,is_ordered," +
-                     "requisition_status,work_ordered_date,deadline,plantation_id) VALUES (?,?,?,?,?,?,?,?,?)";
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, taskMC.getDescription(t));
-            ps.setString(2, taskMC.getDepartment(t));
-            ps.setBoolean(3, taskMC.isComplete(t));
-            ps.setBoolean(4, taskMC.isAllocated(t));
-            ps.setBoolean(5, taskMC.isOrdered(t));
-            ps.setBoolean(6, taskMC.getRequisitionStatus(t));
-            ps.setString(7, taskMC.getWorkOrderedDate(t));
-            ps.setString(8, taskMC.getDeadline(t));
-            ps.setInt(9, taskMC.getPlantationId(t));
-            ps.executeUpdate();
-            successMessage = "สร้าง Task สำเร็จ";
-            return true;
-        } catch (SQLException e) { errorMessage = "สร้าง Task ไม่สำเร็จ: " + e.getMessage(); return false; }
+            // ดึง national_id ของผู้สร้างงาน (ถ้าไม่มีใน Session ให้ใช้รหัสพนักงานจัดสรรเริ่มต้น)
+            String createdBy = getCurrentUserNationalId(con);
+            if (createdBy == null) {
+                createdBy = "1100100000001";
+            }
+
+            String sql = "INSERT INTO task (description,department,is_complete,is_allocated,is_ordered," +
+                         "requisition_status,work_ordered_date,deadline,plantation_id,created_by,assigned_to) " +
+                         "VALUES (?,?,?,?,?,?,?,?,?,?,NULL)";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, taskMC.getDescription(t));
+                ps.setString(2, taskMC.getDepartment(t));
+                ps.setBoolean(3, taskMC.isComplete(t));
+                ps.setBoolean(4, taskMC.isAllocated(t));
+                ps.setBoolean(5, taskMC.isOrdered(t));
+                ps.setBoolean(6, taskMC.getRequisitionStatus(t));
+                ps.setString(7, taskMC.getWorkOrderedDate(t));
+                ps.setString(8, taskMC.getDeadline(t));
+                ps.setInt(9, taskMC.getPlantationId(t));
+                ps.setString(10, createdBy);
+                ps.executeUpdate();
+                successMessage = "สร้าง Task สำเร็จ";
+                return true;
+            }
+        } catch (SQLException e) {
+            errorMessage = "สร้าง Task ไม่สำเร็จ: " + e.getMessage();
+            return false;
+        }
     }
 
     public boolean updateTaskComplete(int taskId, boolean complete) {
@@ -215,7 +227,6 @@ public class ResourceController {
 
     // DEALLOCATE 
     public boolean deallocateTask(int taskId) {
-        // ใช้ INNER JOIN แทน Subquery เพื่อป้องกัน MySQL ล็อกตารางซ้อนกัน
         String sqlUpdRes  = "UPDATE resource r " +
                             "INNER JOIN reservation_line rl ON r.resource_id = rl.resource_id " +
                             "SET r.status = 'available' " +
@@ -260,6 +271,7 @@ public class ResourceController {
             return false;
         }
     }
+
     //  RESOURCES (JOIN Superclass + Subclasses)
     private static final String RESOURCE_SELECT =
         "SELECT r.resource_id, r.resource_type, r.status, " +
@@ -357,7 +369,7 @@ public class ResourceController {
     //  RESERVATION LINES (ดึงชื่อจาก Subclass ด้วย COALESCE)
     public List<ReservationLineModel> getReservationsByTask(int taskId) {
         List<ReservationLineModel> list = new ArrayList<>();
-        String sql = "SELECT rl.reserved_id, rl.task_id, rl.resource_id, rl.date, rl.used_status, rl.return_status, " +
+        String sql = "SELECT rl.*, " +
                      "       COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name, " +
                      "       r.resource_type " +
                      "FROM reservation_line rl " +
@@ -379,7 +391,7 @@ public class ResourceController {
             return false;
         }
         String sqlDate  = "SELECT deadline FROM task WHERE task_id=?";
-        String sqlIns   = "INSERT INTO reservation_line (task_id,resource_id,date,used_status,return_status) VALUES (?,?,?,'pending','not_returned')";
+        String sqlIns = "INSERT INTO reservation_line (task_id, resource_id, date, status) VALUES (?, ?, ?, 'pending')";
         String sqlRes   = "UPDATE resource SET status='reserved' WHERE resource_id=?";
         String sqlAlloc = "UPDATE task SET is_allocated=TRUE WHERE task_id=?";
 
@@ -432,24 +444,33 @@ public class ResourceController {
     public List<EmployeeModel> getAllEmployees() {
         List<EmployeeModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT national_id, username, first_name, last_name, department, position, phone FROM employee ORDER BY department, national_id");
+             PreparedStatement ps = con.prepareStatement("SELECT * FROM employee ORDER BY department, national_id");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(empMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึงข้อมูลพนักงานไม่สำเร็จ: " + e.getMessage(); }
         return list;
     }
 
+    // แก้ไข: เพิ่ม ps.setString(1, empMC.getNationalId(emp)) ให้ครบ 8 พารามิเตอร์
     public boolean addEmployee(EmployeeModel emp) {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
                  "INSERT INTO employee (national_id,username,password,first_name,last_name,department,position,phone) VALUES (?,?,?,?,?,?,?,?)")) {
-            ps.setString(1,empMC.getNationalId(emp));
-            ps.setString(2,empMC.getUsername(emp)); ps.setString(3,empMC.getPassword(emp));
-            ps.setString(4,empMC.getFirstName(emp)); ps.setString(5,empMC.getLastName(emp));
-            ps.setString(6,empMC.getDepartment(emp)); ps.setString(7,empMC.getPosition(emp));
-            ps.setString(8,empMC.getPhone(emp));
-            ps.executeUpdate(); successMessage = "เพิ่มพนักงานสำเร็จ"; return true;
-        } catch (SQLException e) { errorMessage = "เพิ่มพนักงานไม่สำเร็จ: " + e.getMessage(); return false; }
+            ps.setString(1, empMC.getNationalId(emp));
+            ps.setString(2, empMC.getUsername(emp));
+            ps.setString(3, empMC.getPassword(emp));
+            ps.setString(4, empMC.getFirstName(emp));
+            ps.setString(5, empMC.getLastName(emp));
+            ps.setString(6, empMC.getDepartment(emp));
+            ps.setString(7, empMC.getPosition(emp));
+            ps.setString(8, empMC.getPhone(emp));
+            ps.executeUpdate();
+            successMessage = "เพิ่มพนักงานสำเร็จ";
+            return true;
+        } catch (SQLException e) {
+            errorMessage = "เพิ่มพนักงานไม่สำเร็จ: " + e.getMessage();
+            return false;
+        }
     }
 
     //  ACCESSORS 

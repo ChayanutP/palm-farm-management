@@ -39,22 +39,28 @@ public class ReservationLineModelController {
         return rl.date;
     }
 
-    public String getUsedStatus(ReservationLineModel rl) {
-        return rl.used_status;
+    public String getStatus(ReservationLineModel rl) {
+        return rl.status;
     }
 
     public String getReturnStatus(ReservationLineModel rl) {
-        return rl.return_status;
+    if (rl == null || rl.status == null) return "not_returned";
+    return "returned".equalsIgnoreCase(rl.status) ? "returned" : "not_returned";
+}
+
+    /** ตรวจว่าอยู่ระหว่างรอดำเนินการ */
+    public boolean isPending(ReservationLineModel rl) {
+        return "pending".equals(rl.status);
     }
 
-    /** ตรวจว่าถูกใช้งานแล้ว */
+    /** ตรวจว่าถูกใช้งานแล้ว (รวมถึงสถานะที่ถูกคืนแล้ว) */
     public boolean isUsed(ReservationLineModel rl) {
-        return "used".equals(rl.used_status) || "returned".equals(rl.used_status);
+        return "used".equals(rl.status) || "returned".equals(rl.status);
     }
 
     /** ตรวจว่าคืนแล้ว */
     public boolean isReturned(ReservationLineModel rl) {
-        return "returned".equals(rl.return_status);
+        return "returned".equals(rl.status);
     }
 
     // 
@@ -85,12 +91,8 @@ public class ReservationLineModelController {
         rl.date = v;
     }
 
-    public void setUsedStatus(ReservationLineModel rl, String v) {
-        rl.used_status = v;
-    }
-
-    public void setReturnStatus(ReservationLineModel rl, String v) {
-        rl.return_status = v;
+    public void setStatus(ReservationLineModel rl, String v) {
+        rl.status = v;
     }
 
     // 
@@ -100,8 +102,7 @@ public class ReservationLineModelController {
     /** สร้าง ReservationLineModel เปล่าพร้อม default status */
     public ReservationLineModel createEmpty() {
         ReservationLineModel rl = new ReservationLineModel();
-        rl.used_status   = "pending";
-        rl.return_status = "not_returned";
+        rl.status = "pending";
         return rl;
     }
 
@@ -111,15 +112,16 @@ public class ReservationLineModelController {
      */
     public ReservationLineModel mapFromResultSet(ResultSet rs) throws SQLException {
         ReservationLineModel rl = new ReservationLineModel();
-        rl.reserved_id   = rs.getInt("reserved_id");
-        rl.task_id       = rs.getInt("task_id");
-        rl.resource_id   = rs.getInt("resource_id");
-        rl.date          = rs.getString("date");
-        rl.used_status   = rs.getString("used_status");
-        rl.return_status = rs.getString("return_status");
-        // อาจมีหรือไม่มีก็ได้ (ขึ้นอยู่กับว่า query JOIN หรือเปล่า)
+        rl.reserved_id = rs.getInt("reserved_id");
+        rl.task_id     = rs.getInt("task_id");
+        rl.resource_id = rs.getInt("resource_id");
+        rl.date        = rs.getString("date");
+        rl.status      = rs.getString("status");
+
+        // Optional columns จาก JOIN
         try { rl.resource_name = rs.getString("resource_name"); } catch (SQLException ignored) {}
         try { rl.resource_type = rs.getString("resource_type"); } catch (SQLException ignored) {}
+
         return rl;
     }
 }

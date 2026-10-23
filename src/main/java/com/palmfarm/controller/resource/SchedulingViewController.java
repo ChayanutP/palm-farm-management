@@ -139,13 +139,14 @@ public class SchedulingViewController implements Initializable {
         lblNew.setStyle("-fx-text-fill: #ccddcc; -fx-font-size: 12px;");
 
         // reqSchedule() — ปฏิทินให้เลือกวัน
-        LocalDate minDeadline = LocalDate.now().plusDays(10);
+        LocalDate minDeadline = LocalDate.now().plusDays(1);
         // ถ้า deadline ปัจจุบันยังอยู่ในอนาคตมากกว่า min ให้ใช้ค่าเดิม มิฉะนั้นใช้ min
         LocalDate pickerInit = initDate.isAfter(minDeadline) ? initDate : minDeadline;
         DatePicker datePicker = new DatePicker(pickerInit);
         datePicker.setStyle("-fx-background-color: #2d3e2d;");
         datePicker.setPrefWidth(220);
-        // ห้ามเลือกวันที่น้อยกว่าวันนี้ + 10
+        // ห้ามเลือกวันที่น้อยกว่าวันนี้ + 1
+        // สามารถเลื่อน deadline เข้ามาได้
         datePicker.setDayCellFactory(picker -> new javafx.scene.control.DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {

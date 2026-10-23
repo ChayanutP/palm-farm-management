@@ -18,6 +18,14 @@ public class PalmCareController {
     private String errorMessage   = "";
     private String successMessage = "";
 
+    // Helper: ดึง national_id ของพนักงานที่กำลังล็อกอินอยู่
+    private String getCurrentUserNationalId(Connection con) {
+    EmployeeModel user = SessionManager.getCurrentUser();
+    if (user == null) return null;
+
+    return user.national_id; // หรือชื่อเมธอด getter ใน EmployeeModel เช่น user.getNational_id()
+}
+
     // ============================================================
     // UC: บันทึกการใช้ทรัพยากร
     // ============================================================
@@ -26,7 +34,7 @@ public class PalmCareController {
         List<TaskModel> list = new ArrayList<>();
         String dept = empMC.getDepartment(SessionManager.getCurrentUser());
         String sql  = """
-            SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, p.name AS plantation_name
+            SELECT t.*, p.name AS plantation_name
             FROM task t
             LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
             WHERE t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.department = ? AND t.requisition_status = FALSE
@@ -47,7 +55,7 @@ public class PalmCareController {
         List<TaskModel> list = new ArrayList<>();
         String dept = empMC.getDepartment(SessionManager.getCurrentUser());
         String sql  = """
-            SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, p.name AS plantation_name
+            SELECT t.*, p.name AS plantation_name
             FROM task t
             LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
             WHERE t.is_complete = FALSE AND t.is_ordered = TRUE AND t.is_allocated = TRUE AND t.department = ? AND t.requisition_status = TRUE
@@ -66,7 +74,7 @@ public class PalmCareController {
 
     public List<ReservationLineModel> getReservationsForTask(int taskId) {
         List<ReservationLineModel> list = new ArrayList<>();
-        String sql = "SELECT rl.reserved_id, rl.task_id, rl.resource_id, rl.date, rl.used_status, rl.return_status, r.resource_type, " +
+        String sql = "SELECT rl.*, r.resource_type, " +
                      "COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name " +
                      "FROM reservation_line rl " +
                      "JOIN resource r ON rl.resource_id = r.resource_id " +
@@ -84,15 +92,32 @@ public class PalmCareController {
         return list;
     }
 
+    // แก้ไข: บันทึกผู้รับงานลง assigned_to และเปลี่ยนสถานะ resource เป็น 'in_use'
     public boolean markResourceAsUsed(int taskId) {
-        String sql1 = "UPDATE reservation_line SET used_status = 'used' WHERE task_id = ?";
-        String sql2 = "UPDATE task SET requisition_status = TRUE WHERE task_id = ?";
+        String sql1 = "UPDATE reservation_line SET status = 'used' WHERE task_id = ?";
+        String sql2 = "UPDATE task SET requisition_status = TRUE, assigned_to = COALESCE(assigned_to, ?) WHERE task_id = ?";
+        String sql3 = """
+            UPDATE resource r
+            JOIN reservation_line rl ON r.resource_id = rl.resource_id
+            SET r.status = 'in_use' WHERE rl.task_id = ?
+            """;
         try (Connection con = DBConnection.getConnection()) {
             con.setAutoCommit(false);
             try (PreparedStatement ps1 = con.prepareStatement(sql1);
-                 PreparedStatement ps2 = con.prepareStatement(sql2)) {
-                ps1.setInt(1, taskId); ps1.executeUpdate();
-                ps2.setInt(1, taskId); ps2.executeUpdate();
+                 PreparedStatement ps2 = con.prepareStatement(sql2);
+                 PreparedStatement ps3 = con.prepareStatement(sql3)) {
+                String assignedTo = getCurrentUserNationalId(con);
+
+                ps1.setInt(1, taskId);
+                ps1.executeUpdate();
+
+                ps2.setString(1, assignedTo);
+                ps2.setInt(2, taskId);
+                ps2.executeUpdate();
+
+                ps3.setInt(1, taskId);
+                ps3.executeUpdate();
+
                 con.commit();
                 successMessage = "บันทึกการใช้ทรัพยากรสำเร็จ";
                 return true;
@@ -114,7 +139,7 @@ public class PalmCareController {
     public List<TaskModel> getAssignedTasks() {
         List<TaskModel> list = new ArrayList<>();
         String sql = """
-            SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, p.name AS plantation_name
+            SELECT t.*, p.name AS plantation_name
             FROM task t
             LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id
             WHERE t.department = ? AND t.is_complete = FALSE
@@ -133,7 +158,7 @@ public class PalmCareController {
     }
 
     public boolean completeTaskAndReturnResources(int taskId) {
-        String sql1 = "UPDATE reservation_line SET return_status='returned', used_status='returned' WHERE task_id=?";
+       String sql1 = "UPDATE reservation_line SET status = 'returned' WHERE task_id = ?";
         String sql2 = "UPDATE task SET is_complete=TRUE WHERE task_id=?";
         String sql3 = """
             UPDATE resource r

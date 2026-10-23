@@ -59,7 +59,7 @@ public class UseResourceViewController implements Initializable {
         colRlType.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.rl().getResourceType(d.getValue())));
         colRlUsed.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.rl().getUsedStatus(d.getValue())));
+            new SimpleStringProperty(ctrl.rl().getStatus(d.getValue())));
 
         tableTask.getSelectionModel().selectedItemProperty().addListener((obs, old, nw) -> {
             if (nw != null) {
@@ -81,7 +81,7 @@ public class UseResourceViewController implements Initializable {
 
     @FXML public void handleMarkUsed(ActionEvent e) {
         if (selectedTask == null) { lblMsg.setText("กรุณาเลือก Task"); return; }
-        boolean ok = ctrl.markResourcesUsed(ctrl.task().getTaskId(selectedTask));
+        boolean ok = ctrl.markResourceAsUsed(ctrl.task().getTaskId(selectedTask));
         lblMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#ff8888;");
         lblMsg.setText(ok ? ctrl.getSuccessMessage() : ctrl.getErrorMessage());
         ctrl.clearMessages();

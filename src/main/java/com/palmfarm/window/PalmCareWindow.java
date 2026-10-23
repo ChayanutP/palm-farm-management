@@ -28,7 +28,16 @@ public class PalmCareWindow {
         Button btnUse    = menuButton("บันทึกการใช้ทรัพยากร",
             () -> new UseResourceWindow().show());
         Button btnReturn = menuButton("คืนทรัพยากร",
-            () -> new ReturnResourceWindow().show());
+            () -> {
+    try {
+        new ReturnResourceWindow().show();}
+    catch (Exception ex) {
+        ex.printStackTrace(); // พิมพ์ Error ตัวจริงออกมาใน Console ทันที
+        
+    }
+    }
+);
+    
         Button btnLogout = menuButton("ออกจากระบบ", () -> {
             SessionManager.clearSession(); stage.close();
             new LoginWindow(new Stage()).show();

@@ -62,7 +62,7 @@ public class HarvestTaskViewController implements Initializable {
         colRlType.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.rl().getResourceType(d.getValue())));
         colRlUsed.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.rl().getUsedStatus(d.getValue())));
+            new SimpleStringProperty(ctrl.rl().getStatus(d.getValue())));
 
         tableTask.getSelectionModel().selectedItemProperty().addListener((obs, old, nw) -> {
             if (nw != null) {
@@ -100,7 +100,7 @@ public class HarvestTaskViewController implements Initializable {
 
     @FXML public void handleMarkUsed(ActionEvent e) {
         if (selectedTask == null) { lblMsg.setText("กรุณาเลือก Task"); return; }
-        boolean ok = ctrl.markResourcesUsed(ctrl.task().getTaskId(selectedTask));
+        boolean ok = ctrl.markResourceAsUsed(ctrl.task().getTaskId(selectedTask));
         lblMsg.setStyle(ok ? "-fx-text-fill: #88ff88;" : "-fx-text-fill: #ff8888;");
         lblMsg.setText(ok ? ctrl.getSuccessMessage() : ctrl.getErrorMessage());
         ctrl.clearMessages();
@@ -115,7 +115,7 @@ public class HarvestTaskViewController implements Initializable {
             lblMsg.setText("งานนี้ยังไม่ได้รับการมอบหมาย ไม่สามารถเสร็จสิ้นได้");
             return;
         }
-                boolean ok = ctrl.completeTask(ctrl.task().getTaskId(selectedTask));
+                boolean ok = ctrl.completeTaskAndReturnResources(ctrl.task().getTaskId(selectedTask));
                 lblMsg.setStyle(ok ? "-fx-text-fill: #88ff88;" : "-fx-text-fill: #ff8888;");
                 lblMsg.setText(ok ? ctrl.getSuccessMessage() : ctrl.getErrorMessage());
                 ctrl.clearMessages();

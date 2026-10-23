@@ -68,7 +68,7 @@ public class UseResourceViewController implements Initializable {
         colRlType.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.rl().getResourceType(d.getValue())));
         colRlUsed.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.rl().getUsedStatus(d.getValue())));
+            new SimpleStringProperty(ctrl.rl().getStatus(d.getValue())));
 
         tableTask.getSelectionModel().selectedItemProperty().addListener((obs, old, nw) -> {
             if (nw != null) {
