@@ -6,46 +6,80 @@
             fx:controller="com.palmfarm.controller.accounting.RecordBillViewController"
             style="-fx-background-color:#1a2a1a;">
   <center>
-    <HBox spacing="15" style="-fx-padding:15;">
-      <VBox spacing="8" HBox.hgrow="ALWAYS">
-        <HBox spacing="8"><Button text="" onAction="#handleRefresh"
-              style="-fx-background-color:#607D8B;-fx-text-fill:white;-fx-cursor:hand;"/></HBox>
-        <TableView fx:id="tableStored" VBox.vgrow="ALWAYS"
+    <HBox spacing="12" style="-fx-padding:12;">
+
+      <!-- ซ้าย: ตาราง (สูงคงที่) + รูปบิล (เติมพื้นที่ล่าง) -->
+      <VBox spacing="6" HBox.hgrow="ALWAYS">
+
+        <HBox spacing="8" alignment="CENTER_LEFT">
+          <Label text="บิลที่รอบันทึกข้อมูล:"
+                 style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;"/>
+          <Button text="รีเฟรช" onAction="#handleRefresh"
+                  style="-fx-background-color:#607D8B;-fx-text-fill:white;
+                         -fx-cursor:hand;-fx-padding:5 12;"/>
+        </HBox>
+
+        <!-- ตาราง — สูงคงที่ 130px ไม่ขยาย -->
+        <TableView fx:id="tableStored"
+                   prefHeight="130" minHeight="130" maxHeight="130"
                    style="-fx-background-color:#243224;-fx-control-inner-background:#243224;">
           <columns>
-            <TableColumn fx:id="colBillId" text="ID"        prefWidth="60"/>
-            <TableColumn fx:id="colNumber" text="เลขที่บิล"   prefWidth="140"/>
-            <TableColumn fx:id="colDate"   text="วันที่ขาย"   prefWidth="120"/>
-            <TableColumn fx:id="colBuyer"  text="ผู้รับซื้อ"   prefWidth="160"/>
-            <TableColumn fx:id="colTotal"  text="ยอดรวม (฿)" prefWidth="120"/>
+            <TableColumn fx:id="colBillId"   text="ID"           prefWidth="70"/>
+            <TableColumn fx:id="colUploaded" text="อัปโหลดเมื่อ"  prefWidth="300"/>
           </columns>
-          <placeholder><Label text="ไม่มีบิล" style="-fx-text-fill:#88aa88;"/></placeholder>
+          <placeholder>
+            <Label text="ไม่มีบิลรอบันทึก" style="-fx-text-fill:#88aa88;"/>
+          </placeholder>
         </TableView>
-        <Label text="รูปบิล:" style="-fx-text-fill:#aaccaa;"/>
-        <ImageView fx:id="imgBill" fitWidth="380" fitHeight="200" preserveRatio="true"/>
+
+        <!-- รูปบิล — เติมพื้นที่ที่เหลือ ไม่บังตาราง -->
+        <ScrollPane VBox.vgrow="ALWAYS"
+                    style="-fx-background-color:#0d1a0d;-fx-background:#0d1a0d;
+                           -fx-border-color:#3a5a3a;-fx-border-width:1;">
+          <ImageView fx:id="imgBill" fitWidth="600" preserveRatio="true"/>
+        </ScrollPane>
+
       </VBox>
-      <VBox spacing="8" prefWidth="290" style="-fx-background-color:#243224;-fx-padding:15;-fx-background-radius:8;">
-        <Label text="กรอกข้อมูลบิล" style="-fx-text-fill:#4CAF50;-fx-font-weight:bold;-fx-font-size:14px;"/>
+
+      <!-- ขวา: ฟอร์มกรอกข้อมูล -->
+      <VBox spacing="8" prefWidth="270"
+            style="-fx-background-color:#243224;-fx-padding:15;-fx-background-radius:8;">
+        <Label text="กรอกข้อมูลจากรูปบิล"
+               style="-fx-text-fill:#4CAF50;-fx-font-weight:bold;-fx-font-size:14px;"/>
+        <Separator style="-fx-background-color:#3a5a3a;"/>
+
         <Label text="เลขที่บิล:" style="-fx-text-fill:#ccddcc;"/>
-        <TextField fx:id="txtBillNumber" promptText="เลขที่บิล"
+        <TextField fx:id="txtBillNumber" promptText="เช่น BILL-2026-001"
                    style="-fx-background-color:#2d3e2d;-fx-text-fill:white;"/>
+
         <Label text="วันที่ขาย:" style="-fx-text-fill:#ccddcc;"/>
-        <DatePicker fx:id="dpSaleDate" prefWidth="260"/>
+        <DatePicker fx:id="dpSaleDate" prefWidth="240"/>
+
         <Label text="ผู้รับซื้อ:" style="-fx-text-fill:#ccddcc;"/>
-        <TextField fx:id="txtBuyer" promptText="ชื่อผู้รับซื้อ"
+        <TextField fx:id="txtBuyer" promptText="ชื่อบริษัทหรือบุคคล"
                    style="-fx-background-color:#2d3e2d;-fx-text-fill:white;"/>
+
         <Label text="ปริมาณ (กก.):" style="-fx-text-fill:#ccddcc;"/>
-        <TextField fx:id="txtQuantity" promptText="ปริมาณ"
+        <TextField fx:id="txtQuantity" promptText="เช่น 5200"
                    style="-fx-background-color:#2d3e2d;-fx-text-fill:white;"/>
-        <Label text="ราคา/หน่วย (฿):" style="-fx-text-fill:#ccddcc;"/>
-        <TextField fx:id="txtPriceUnit" promptText="ราคา"
+
+        <Label text="ราคา/หน่วย (บาท/กก.):" style="-fx-text-fill:#ccddcc;"/>
+        <TextField fx:id="txtPriceUnit" promptText="เช่น 6.50"
                    style="-fx-background-color:#2d3e2d;-fx-text-fill:white;"/>
+
+        <Separator style="-fx-background-color:#3a5a3a;"/>
         <Label fx:id="lblTotalCalc" text="รวม: —"
                style="-fx-text-fill:#FFD700;-fx-font-size:14px;-fx-font-weight:bold;"/>
+
+        <Region VBox.vgrow="ALWAYS"/>
+
         <Button text="บันทึกข้อมูลบิล" onAction="#handleSave" maxWidth="Infinity"
-                style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;"/>
-        <Label fx:id="lblMsg" text="" style="-fx-text-fill:#88ff88;" wrapText="true"/>
+                style="-fx-background-color:#4CAF50;-fx-text-fill:white;
+                       -fx-font-size:13px;-fx-cursor:hand;-fx-padding:10;
+                       -fx-background-radius:5;"/>
+        <Label fx:id="lblMsg" text="" wrapText="true" style="-fx-font-size:12px;"/>
       </VBox>
+
     </HBox>
   </center>
 </BorderPane>

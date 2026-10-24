@@ -300,11 +300,15 @@ UPDATE task SET is_allocated = TRUE WHERE task_id IN (
 
 -- 6. Bills (เปลี่ยนจาก plantation_id เป็น stored_by ที่เชื่อมกับพนักงานบัญชี)
 -- ยังไม่จัดเก็บ (is_stored=FALSE, stored_by=NULL)
+-- bills ที่ยังไม่จัดเก็บ (is_stored=FALSE) — รอกดจัดเก็บในหน้า Store Bill
+-- bill_image_path ใช้ path สัมพัทธ์จาก working directory (root ของโปรเจกต์)
+-- วางรูปไว้ที่: src/main/resources/bills/
 INSERT INTO bills (bill_image_path, is_stored, stored_by) VALUES
-('/path/to/bill_oct_001.jpg', FALSE, NULL),
-('/path/to/bill_oct_002.jpg', FALSE, NULL);
+('src/main/resources/bills/bill_unstored_001.png', FALSE, NULL),
+('src/main/resources/bills/bill_unstored_002.png', FALSE, NULL);
 
--- จัดเก็บแล้วโดยพนักงานบัญชี '1100100000004' (is_stored=TRUE)
+-- bills ที่จัดเก็บแล้ว (is_stored=TRUE) พร้อมข้อมูลครบถ้วน
 INSERT INTO bills (bill_number, bill_image_path, is_stored, sale_date, buyer_name, palm_quantity, price_per_unit, total_amount, stored_by) VALUES
-('BILL-2026-001', '/path/to/bill_sep_001.jpg', TRUE, '2026-09-20', 'บริษัท โรงงานสกัดปาล์ม จำกัด', 5000.00, 6.50, 32500.00, '1100100000004'),
-('BILL-2026-002', '/path/to/bill_sep_002.jpg', TRUE, '2026-09-28', 'บริษัท ปาล์มออยล์ จำกัด',      3200.00, 6.80, 21760.00, '1100100000004');
+-- stored_by = พนักงาน HARVEST ที่ขนส่งและส่งบิล
+('BILL-2026-001', 'src/main/resources/bills/bill_001.png', TRUE, '2026-09-20', 'Palm Oil Factory Co., Ltd.', 5000.00, 6.50, 32500.00, '1100100000007'),
+('BILL-2026-002', 'src/main/resources/bills/bill_002.png', TRUE, '2026-09-28', 'Thai Palm Oil Co., Ltd.',    3200.00, 6.80, 21760.00, '1100100000007');

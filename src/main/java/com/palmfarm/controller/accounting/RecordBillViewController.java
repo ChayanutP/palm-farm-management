@@ -2,7 +2,6 @@ package com.palmfarm.controller.accounting;
 
 import com.palmfarm.controller.AccountingController;
 import com.palmfarm.model.BillModel;
-import com.palmfarm.util.SessionManager;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -16,12 +15,11 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class RecordBillViewController implements Initializable {
+
     @FXML private TableView<BillModel>            tableStored;
     @FXML private TableColumn<BillModel, Integer> colBillId;
-    @FXML private TableColumn<BillModel, String>  colNumber;
-    @FXML private TableColumn<BillModel, String>  colDate;
-    @FXML private TableColumn<BillModel, String>  colBuyer;
-    @FXML private TableColumn<BillModel, String>  colTotal;
+    @FXML private TableColumn<BillModel, String>  colUploaded;
+
     @FXML private ImageView  imgBill;
     @FXML private TextField  txtBillNumber;
     @FXML private DatePicker dpSaleDate;
@@ -36,49 +34,54 @@ public class RecordBillViewController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        var empMC = new com.palmfarm.controller.model.EmployeeModelController();
         setupTable();
         loadBills();
-        txtQuantity.textProperty().addListener((o,a,b) -> updateTotal());
-        txtPriceUnit.textProperty().addListener((o,a,b) -> updateTotal());
+        txtQuantity.textProperty().addListener((o, a, b) -> updateTotal());
+        txtPriceUnit.textProperty().addListener((o, a, b) -> updateTotal());
     }
 
     private void setupTable() {
         colBillId.setCellValueFactory(d ->
             new SimpleIntegerProperty(ctrl.bill().getBillId(d.getValue())).asObject());
-        colNumber.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.bill().getBillNumber(d.getValue())));
-        colDate.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.bill().getSaleDate(d.getValue())));
-        colBuyer.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.bill().getBuyerName(d.getValue())));
-        colTotal.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.bill().getTotalFormatted(d.getValue())));
+        colUploaded.setCellValueFactory(d ->
+            new SimpleStringProperty(ctrl.bill().getUploadedAt(d.getValue())));
 
         tableStored.getSelectionModel().selectedItemProperty().addListener((obs, old, nw) -> {
-            if (nw != null) { selectedBill = nw; populateForm(nw); loadImage(ctrl.bill().getBillImagePath(nw)); }
+            if (nw != null) {
+                selectedBill = nw;
+                clearForm();               // ฟอร์มว่างเสมอ ผู้ใช้กรอกเองจากรูป
+                loadImage(ctrl.bill().getBillImagePath(nw));
+                lblMsg.setText("");
+            }
         });
     }
 
     private void loadBills() {
         tableStored.setItems(FXCollections.observableArrayList(ctrl.getStoredBills()));
+        selectedBill = null;
+        clearForm();
+        imgBill.setImage(null);
     }
 
-    private void populateForm(BillModel b) {
-        txtBillNumber.setText(ctrl.bill().getBillNumber(b) != null ? ctrl.bill().getBillNumber(b) : "");
-        txtBuyer.setText(ctrl.bill().getBuyerName(b) != null ? ctrl.bill().getBuyerName(b) : "");
-        txtQuantity.setText(ctrl.bill().getPalmQuantity(b) > 0 ? String.valueOf(ctrl.bill().getPalmQuantity(b)) : "");
-        txtPriceUnit.setText(ctrl.bill().getPricePerUnit(b) > 0 ? String.valueOf(ctrl.bill().getPricePerUnit(b)) : "");
-        if (ctrl.bill().getSaleDate(b) != null && !ctrl.bill().getSaleDate(b).isBlank())
-            dpSaleDate.setValue(java.time.LocalDate.parse(ctrl.bill().getSaleDate(b)));
-        updateTotal();
+    /** ล้างฟอร์มทุกครั้งที่เลือกบิลใหม่ */
+    private void clearForm() {
+        txtBillNumber.clear();
+        txtBuyer.clear();
+        txtQuantity.clear();
+        txtPriceUnit.clear();
+        dpSaleDate.setValue(null);
+        lblTotalCalc.setText("รวม: —");
     }
 
     private void loadImage(String path) {
-        if (path != null && !path.isBlank()) {
-            try { File f = new File(path); if (f.exists()) imgBill.setImage(new Image(f.toURI().toString())); }
-            catch (Exception ignored) { imgBill.setImage(null); }
-        }
+        if (path == null || path.isBlank()) { imgBill.setImage(null); return; }
+        try {
+            File f = new File(path);
+            if (f.exists()) { imgBill.setImage(new Image(f.toURI().toString())); return; }
+            File rel = new File(System.getProperty("user.dir"), path);
+            if (rel.exists()) { imgBill.setImage(new Image(rel.toURI().toString())); return; }
+            imgBill.setImage(null);
+        } catch (Exception ignored) { imgBill.setImage(null); }
     }
 
     private void updateTotal() {
@@ -90,19 +93,37 @@ public class RecordBillViewController implements Initializable {
     }
 
     @FXML public void handleSave(ActionEvent e) {
-        if (selectedBill == null) { lblMsg.setText("กรุณาเลือกบิล"); return; }
+        if (selectedBill == null) { showError("กรุณาเลือกบิล"); return; }
+        if (txtBillNumber.getText().isBlank() || txtBuyer.getText().isBlank()
+                || dpSaleDate.getValue() == null
+                || txtQuantity.getText().isBlank() || txtPriceUnit.getText().isBlank()) {
+            showError("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+            return;
+        }
         try {
-            ctrl.bill().setBillNumber(selectedBill,  txtBillNumber.getText());
-            ctrl.bill().setSaleDate(selectedBill,    dpSaleDate.getValue() != null ? dpSaleDate.getValue().toString() : "");
-            ctrl.bill().setBuyerName(selectedBill,   txtBuyer.getText());
-            ctrl.bill().setPalmQuantity(selectedBill,  Double.parseDouble(txtQuantity.getText()));
-            ctrl.bill().setPricePerUnit(selectedBill,  Double.parseDouble(txtPriceUnit.getText()));
-        } catch (NumberFormatException ex) { lblMsg.setText("ปริมาณและราคาต้องเป็นตัวเลข"); return; }
-        ctrl.saveBillData(selectedBill);
-        lblMsg.setText(ctrl.getSuccessMessage().isEmpty() ? ctrl.getErrorMessage() : ctrl.getSuccessMessage());
-        ctrl.clearMessages();
-        loadBills();
+            ctrl.bill().setBillNumber(selectedBill,   txtBillNumber.getText().trim());
+            ctrl.bill().setSaleDate(selectedBill,     dpSaleDate.getValue().toString());
+            ctrl.bill().setBuyerName(selectedBill,    txtBuyer.getText().trim());
+            ctrl.bill().setPalmQuantity(selectedBill, Double.parseDouble(txtQuantity.getText()));
+            ctrl.bill().setPricePerUnit(selectedBill, Double.parseDouble(txtPriceUnit.getText()));
+        } catch (NumberFormatException ex) { showError("ปริมาณและราคาต้องเป็นตัวเลข"); return; }
+
+        boolean ok = ctrl.saveBillData(selectedBill);
+        if (ok) {
+            lblMsg.setStyle("-fx-text-fill:#88ff88;");
+            lblMsg.setText(ctrl.getSuccessMessage());
+            ctrl.clearMessages();
+            loadBills();
+        } else {
+            showError(ctrl.getErrorMessage());
+            ctrl.clearMessages();
+        }
     }
 
-    @FXML public void handleRefresh(ActionEvent e) { loadBills(); }
+    @FXML public void handleRefresh(ActionEvent e) { loadBills(); lblMsg.setText(""); }
+
+    private void showError(String msg) {
+        lblMsg.setStyle("-fx-text-fill:#ff8888;");
+        lblMsg.setText(msg);
+    }
 }

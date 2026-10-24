@@ -6,31 +6,46 @@
             fx:controller="com.palmfarm.controller.accounting.StoreBillViewController"
             style="-fx-background-color:#1a2a1a;">
   <center>
-    <HBox spacing="15" style="-fx-padding:15;">
-      <VBox spacing="10" HBox.hgrow="ALWAYS">
-        <HBox spacing="8">
-          <Button text="อัปโหลดรูปบิล" onAction="#handleUpload"
-                  style="-fx-background-color:#2196F3;-fx-text-fill:white;-fx-cursor:hand;"/>
+    <HBox spacing="12" style="-fx-padding:12;">
+
+      <!-- ซ้าย: ตาราง -->
+      <VBox spacing="8" prefWidth="400">
+        <HBox spacing="8" alignment="CENTER_LEFT">
+          <Label text="บิลที่รอจัดเก็บ:"
+                 style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;"/>
           <Button text="จัดเก็บบิลที่เลือก" onAction="#handleStore"
-                  style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;"/>
-          <Button text="" onAction="#handleRefresh"
-                  style="-fx-background-color:#607D8B;-fx-text-fill:white;-fx-cursor:hand;"/>
+                  style="-fx-background-color:#4CAF50;-fx-text-fill:white;
+                         -fx-cursor:hand;-fx-padding:6 14;"/>
+          <Button text="รีเฟรช" onAction="#handleRefresh"
+                  style="-fx-background-color:#607D8B;-fx-text-fill:white;
+                         -fx-cursor:hand;-fx-padding:6 14;"/>
         </HBox>
-        <Label fx:id="lblMsg" text="" style="-fx-text-fill:#88ff88;"/>
+        <Label fx:id="lblMsg" text="" style="-fx-font-size:12px;" wrapText="true"/>
         <TableView fx:id="tableUnstored" VBox.vgrow="ALWAYS"
                    style="-fx-background-color:#243224;-fx-control-inner-background:#243224;">
           <columns>
-            <TableColumn fx:id="colBillId"   text="ID"        prefWidth="70"/>
-            <TableColumn fx:id="colUploaded" text="อัปโหลดเมื่อ" prefWidth="220"/>
-            <TableColumn fx:id="colStored"   text="จัดเก็บ"    prefWidth="100"/>
+            <TableColumn fx:id="colBillId"   text="ID"           prefWidth="70"/>
+            <TableColumn fx:id="colUploaded" text="อัปโหลดเมื่อ"  prefWidth="220"/>
+            <TableColumn fx:id="colStored"   text="สถานะ"         prefWidth="90"/>
           </columns>
-          <placeholder><Label text="ไม่มีบิลรอจัดเก็บ" style="-fx-text-fill:#88aa88;"/></placeholder>
+          <placeholder>
+            <Label text="ไม่มีบิลรอจัดเก็บ" style="-fx-text-fill:#88aa88;"/>
+          </placeholder>
         </TableView>
       </VBox>
-      <VBox spacing="8" prefWidth="300" style="-fx-background-color:#243224;-fx-padding:10;-fx-background-radius:8;">
-        <Label text="ตัวอย่างรูปบิล" style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;"/>
-        <ImageView fx:id="imgPreview" fitWidth="280" fitHeight="380" preserveRatio="true"/>
+
+      <!-- ขวา: รูปบิลใหญ่ขึ้น เติมพื้นที่ที่เหลือ -->
+      <VBox spacing="6" HBox.hgrow="ALWAYS"
+            style="-fx-background-color:#243224;-fx-padding:10;-fx-background-radius:8;">
+        <Label text="ตัวอย่างรูปบิล"
+               style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;"/>
+        <ScrollPane VBox.vgrow="ALWAYS"
+                    style="-fx-background-color:#0d1a0d;-fx-background:#0d1a0d;
+                           -fx-border-color:#3a5a3a;-fx-border-width:1;">
+          <ImageView fx:id="imgPreview" fitWidth="580" preserveRatio="true"/>
+        </ScrollPane>
       </VBox>
+
     </HBox>
   </center>
 </BorderPane>

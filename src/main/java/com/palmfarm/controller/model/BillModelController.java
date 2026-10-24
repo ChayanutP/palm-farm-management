@@ -170,7 +170,23 @@ public class BillModelController {
         b.price_per_unit = rs.getDouble("price_per_unit");
         b.total_amount   = rs.getDouble("total_amount");
         b.uploaded_at    = rs.getString("uploaded_at");
-        try { b.plantation_id = rs.getInt("plantation_id"); } catch (SQLException ignored) {}
+        try { b.plantation_id = rs.getInt("plantation_id"); }  catch (SQLException ignored) {}
+        return b;
+    }
+
+    // overload สำหรับ query ที่ไม่มี plantation_id
+    public BillModel mapFromResultSetSimple(ResultSet rs) throws SQLException {
+        BillModel b = new BillModel();
+        b.bill_id        = rs.getInt("bill_id");
+        b.bill_number    = rs.getString("bill_number");
+        b.bill_image_path= rs.getString("bill_image_path");
+        b.is_stored      = rs.getBoolean("is_stored");
+        b.sale_date      = rs.getString("sale_date");
+        b.buyer_name     = rs.getString("buyer_name");
+        b.palm_quantity  = rs.getDouble("palm_quantity");
+        b.price_per_unit = rs.getDouble("price_per_unit");
+        b.total_amount   = rs.getDouble("total_amount");
+        b.uploaded_at    = rs.getString("uploaded_at");
         return b;
     }
 }
