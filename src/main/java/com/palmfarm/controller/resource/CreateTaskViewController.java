@@ -16,6 +16,7 @@ import javafx.scene.control.*;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
+import com.palmfarm.util.ReportExporter;
 
 public class CreateTaskViewController implements Initializable {
     @FXML private TextField                 txtDescription;
@@ -59,8 +60,8 @@ public class CreateTaskViewController implements Initializable {
         setupTable();
         loadTasks();
 
-        // ห้ามเลือก deadline ที่น้อยกว่าวันนี้ + 1 วัน เพื่อให้เวลาคนงานปฏิบัติ
-        LocalDate minDeadline = LocalDate.now().plusDays(1);
+        // ห้ามเลือก deadline ที่น้อยกว่าวันนี้ + 10 วัน
+        LocalDate minDeadline = LocalDate.now().plusDays(10);
         dpDeadline.setDayCellFactory(picker -> new javafx.scene.control.DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
@@ -68,7 +69,7 @@ public class CreateTaskViewController implements Initializable {
                 setDisable(empty || date.isBefore(minDeadline));
             }
         });
-        dpDeadline.setValue(minDeadline); // default = วันนี้ + 1
+        dpDeadline.setValue(minDeadline); // default = วันนี้ + 10
     }
 
     private void setupTable() {
@@ -149,6 +150,41 @@ public class CreateTaskViewController implements Initializable {
             case "ฝ่ายตัด/ปลูก"          -> "CUTTING";
             default                      -> display;
         };
+    }
+
+    @FXML public void handleExport(ActionEvent e) {
+        var tasks = ctrl.getLatestTaskPerGroup();
+        if (tasks.isEmpty()) {
+            lblMsg.setStyle("-fx-text-fill:#ff8888;");
+            lblMsg.setText("ไม่มีข้อมูลสำหรับ export");
+            return;
+        }
+        int[] widths = {8, 32, 22, 18, 16, 18, 14};
+        String[] headers = {"Task ID", "Description", "Plantation", "Department", "Status", "Assigned", "Deadline"};
+        StringBuilder sb = ReportExporter.header("Work Order Report / รายงานใบสั่งงาน");
+        sb.append(ReportExporter.separator(widths)).append("\n");
+        sb.append(ReportExporter.row(headers, widths)).append("\n");
+        sb.append(ReportExporter.separator(widths)).append("\n");
+        for (var t : tasks) {
+            String[] row = {
+                String.valueOf(ctrl.task().getTaskId(t)),
+                ctrl.task().getDescription(t),
+                ctrl.task().getPlantationName(t),
+                ctrl.task().getDepartmentDisplay(t),
+                ctrl.task().getCompleteStatusDisplay(t),
+                ctrl.task().getOrderedStatusDisplay(t),
+                ctrl.task().getDeadline(t)
+            };
+            sb.append(ReportExporter.row(row, widths)).append("\n");
+        }
+        sb.append(ReportExporter.separator(widths)).append("\n");
+        sb.append(ReportExporter.footer(tasks.size()));
+
+        boolean saved = ReportExporter.saveToFile(
+            tableTask.getScene().getWindow(),
+            "work_order_report.txt", sb.toString());
+        lblMsg.setStyle(saved ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#aaaaaa;");
+        lblMsg.setText(saved ? "Export สำเร็จ" : "ยกเลิก");
     }
 
     @FXML public void handleRefresh(ActionEvent e) { loadTasks(); }

@@ -36,6 +36,12 @@ Button btnAssign   = menuButton("จัดสรรทรัพยากร",
             () -> new DeallocateTaskWindow().show());
         Button btnSchedule    = menuButton("เลื่อน Deadline",
             () -> new SchedulingWindow().show());
+        Button btnEmployee   = menuButton("จัดการพนักงาน",
+            () -> new ManageEmployeeWindow().show());
+        Button btnPlantation  = menuButton("จัดการสวนปาล์ม",
+            () -> new ManagePlantationWindow().show());
+        Button btnManageRes   = menuButton("จัดการยานพาหนะและอุปกรณ์",
+            () -> new ManageResourceWindow().show());
         Button btnLogout   = menuButton("ออกจากระบบ", () -> {
             SessionManager.clearSession();
             stage.close();
@@ -44,12 +50,13 @@ Button btnAssign   = menuButton("จัดสรรทรัพยากร",
         btnLogout.setStyle(btnLogout.getStyle()
             + "-fx-background-color:#c0392b;");
 
-        VBox root = new VBox(18, lblTitle, lblUser, btnTask, btnAssign, btnSend, btnDeallocate, btnSchedule, btnLogout);
+        VBox root = new VBox(14, lblTitle, lblUser, btnTask, btnAssign, btnSend, btnDeallocate, btnSchedule,
+            btnEmployee, btnPlantation, btnManageRes, btnLogout);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(40));
         root.setStyle("-fx-background-color:#1a2a1a;");
 
-        Scene scene = new Scene(root, 400, 480);
+        Scene scene = new Scene(root, 420, 680);
         String css = getClass().getResource("/com/palmfarm/view/style.css").toExternalForm();
         scene.getStylesheets().add(css);
         stage.setTitle("ฝ่ายจัดสรรทรัพยากร");

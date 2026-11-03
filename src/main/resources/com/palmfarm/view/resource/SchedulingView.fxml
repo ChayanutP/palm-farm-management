@@ -15,8 +15,8 @@
 
             <HBox alignment="CENTER_LEFT" spacing="8">
                 <Label style="-fx-text-fill: #aaccaa; -fx-font-weight: bold;" text="งานทั้งหมดที่ยังไม่เสร็จสิ้น:" />
-                <Region HBox.hgrow="ALWAYS" />
                 <Button fx:id="btnRefresh" onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white;                                -fx-cursor: hand; -fx-padding: 5 12;" text="รีเฟรช" />
+                <Region HBox.hgrow="ALWAYS" />
             </HBox>
 
             <TableView fx:id="tableTask" style="-fx-background-color: #243224; -fx-control-inner-background: #243224;" VBox.vgrow="ALWAYS">
@@ -33,6 +33,9 @@
                 <placeholder>
                     <Label style="-fx-text-fill: #88aa88;" text="ไม่มีงานที่ยังไม่เสร็จ" />
                 </placeholder>
+            <columnResizePolicy>
+               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
             </TableView>
 
             <Label fx:id="lblMsg" style="-fx-font-size: 12px;" text="" wrapText="true" />

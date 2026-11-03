@@ -31,13 +31,11 @@ public class AccountingController {
 
     public List<BillModel> getUnstoredBills() {
         List<BillModel> list = new ArrayList<>();
-        String sql = "SELECT bill_id, bill_number, bill_image_path, is_stored, sale_date, " +
-                     "buyer_name, palm_quantity, price_per_unit, total_amount, stored_by, uploaded_at " +
-                     "FROM bills WHERE is_stored = FALSE ORDER BY uploaded_at DESC";
+        String sql = "SELECT bill_id, bill_number, bill_image_path, is_stored, sale_date, buyer_name, palm_quantity, price_per_unit, total_amount, stored_by, uploaded_at FROM bills WHERE is_stored = FALSE ORDER BY uploaded_at DESC";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(billMC.mapFromResultSetSimple(rs));
+            while (rs.next()) list.add(billMC.mapFromResultSet(rs));
         } catch (SQLException e) {
             errorMessage = "ดึงบิลไม่สำเร็จ: " + e.getMessage();
         }
@@ -83,15 +81,47 @@ public class AccountingController {
 
     public List<BillModel> getStoredBills() {
         List<BillModel> list = new ArrayList<>();
+        String sql = "SELECT bill_id, bill_number, bill_image_path, is_stored, sale_date, buyer_name, palm_quantity, price_per_unit, total_amount, stored_by, uploaded_at FROM bills WHERE is_stored = TRUE ORDER BY uploaded_at DESC";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(billMC.mapFromResultSet(rs));
+        } catch (SQLException e) {
+            errorMessage = "ดึงบิลไม่สำเร็จ: " + e.getMessage();
+        }
+        return list;
+    }
+
+
+    /** ดึง bills ที่บันทึกข้อมูลครบแล้ว (สำหรับ Export Report) */
+
+    /** bills ที่จัดเก็บแล้วแต่ยังไม่ได้คีย์ข้อมูล (สำหรับหน้า Record Bill) */
+    public List<BillModel> getPendingRecordBills() {
+        List<BillModel> list = new ArrayList<>();
         String sql = "SELECT bill_id, bill_number, bill_image_path, is_stored, sale_date, " +
                      "buyer_name, palm_quantity, price_per_unit, total_amount, stored_by, uploaded_at " +
-                     "FROM bills " +
-                     "WHERE is_stored = TRUE AND (bill_number IS NULL OR bill_number = '') " +
+                     "FROM bills WHERE is_stored = TRUE AND (bill_number IS NULL OR bill_number = '') " +
                      "ORDER BY uploaded_at DESC";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(billMC.mapFromResultSetSimple(rs));
+            while (rs.next()) list.add(billMC.mapFromResultSet(rs));
+        } catch (SQLException e) {
+            errorMessage = "ดึงบิลไม่สำเร็จ: " + e.getMessage();
+        }
+        return list;
+    }
+
+    public List<BillModel> getRecordedBills() {
+        List<BillModel> list = new ArrayList<>();
+        String sql = "SELECT bill_id, bill_number, bill_image_path, is_stored, sale_date, " +
+                     "buyer_name, palm_quantity, price_per_unit, total_amount, stored_by, uploaded_at " +
+                     "FROM bills WHERE is_stored = TRUE AND bill_number IS NOT NULL AND bill_number != '' " +
+                     "ORDER BY sale_date DESC";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(billMC.mapFromResultSet(rs));
         } catch (SQLException e) {
             errorMessage = "ดึงบิลไม่สำเร็จ: " + e.getMessage();
         }

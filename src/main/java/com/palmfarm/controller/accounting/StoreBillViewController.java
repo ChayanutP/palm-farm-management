@@ -2,6 +2,7 @@ package com.palmfarm.controller.accounting;
 
 import com.palmfarm.controller.AccountingController;
 import com.palmfarm.model.BillModel;
+import com.palmfarm.util.SessionManager;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -10,6 +11,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.image.*;
+import javafx.stage.FileChooser;
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -17,7 +20,6 @@ public class StoreBillViewController implements Initializable {
     @FXML private TableView<BillModel>            tableUnstored;
     @FXML private TableColumn<BillModel, Integer> colBillId;
     @FXML private TableColumn<BillModel, String>  colUploaded;
-    @FXML private TableColumn<BillModel, String>  colStored;
     @FXML private ImageView imgPreview;
     @FXML private Label     lblMsg;
 
@@ -36,8 +38,6 @@ public class StoreBillViewController implements Initializable {
             new SimpleIntegerProperty(ctrl.bill().getBillId(d.getValue())).asObject());
         colUploaded.setCellValueFactory(d ->
             new SimpleStringProperty(ctrl.bill().getUploadedAt(d.getValue())));
-        colStored.setCellValueFactory(d ->
-            new SimpleStringProperty(ctrl.bill().isStored(d.getValue()) ? "" : ""));
 
         tableUnstored.getSelectionModel().selectedItemProperty().addListener((obs, old, nw) -> {
             if (nw != null) {
@@ -54,20 +54,22 @@ public class StoreBillViewController implements Initializable {
     private void loadImage(String path) {
         if (path != null && !path.isBlank()) {
             try {
-                // ลอง absolute path ก่อน
-                java.io.File f = new java.io.File(path);
-                if (f.exists()) {
-                    imgPreview.setImage(new Image(f.toURI().toString()));
-                    return;
-                }
-                // ถ้าไม่พบ ลอง path สัมพัทธ์จาก working directory
-                java.io.File rel = new java.io.File(System.getProperty("user.dir"), path);
-                if (rel.exists()) {
-                    imgPreview.setImage(new Image(rel.toURI().toString()));
-                    return;
-                }
-                imgPreview.setImage(null);
+                File f = new File(path);
+                if (f.exists()) imgPreview.setImage(new Image(f.toURI().toString()));
             } catch (Exception ignored) { imgPreview.setImage(null); }
+        }
+    }
+
+    @FXML public void handleUpload(ActionEvent e) {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("เลือกรูปบิล");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images","*.png","*.jpg","*.jpeg"));
+        File file = fc.showOpenDialog(tableUnstored.getScene().getWindow());
+        if (file != null) {
+            ctrl.uploadBillImage(file.getAbsolutePath());
+            lblMsg.setText(ctrl.getSuccessMessage().isEmpty() ? ctrl.getErrorMessage() : ctrl.getSuccessMessage());
+            ctrl.clearMessages();
+            loadBills();
         }
     }
 

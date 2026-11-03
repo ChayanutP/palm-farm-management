@@ -26,7 +26,8 @@
         <Label style="-fx-text-fill:#ccddcc;" text="กำหนดส่ง:" />
         <DatePicker fx:id="dpDeadline" prefWidth="148" />
         <Button onAction="#handleCreateTask" style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:6 14;" text=" สร้างใบสั่งงาน" />
-        <Button onAction="#handleRefresh" style="-fx-background-color:#2196F3;-fx-text-fill:white;-fx-cursor:hand;" text="" />
+        <Button onAction="#handleExport" style="-fx-background-color: #795548; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 6 14;" text="Export รายงาน" />
+        <Button onAction="#handleRefresh" style="-fx-background-color:#2196F3;-fx-text-fill:white;-fx-cursor:hand;" text="รีเฟรช" />
       </HBox>
 
       <Label fx:id="lblMsg" style="-fx-font-size:12px;" text="" />
@@ -43,6 +44,9 @@
           <TableColumn fx:id="colDeadline" prefWidth="240.00006103515625" text="กำหนดส่ง" />
         </columns>
         <placeholder><Label style="-fx-text-fill:#88aa88;" text="ไม่มีข้อมูล" /></placeholder>
+            <columnResizePolicy>
+               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
       </TableView>
     </VBox>
   </center>

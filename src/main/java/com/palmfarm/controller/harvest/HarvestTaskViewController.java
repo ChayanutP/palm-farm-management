@@ -92,7 +92,7 @@ public class HarvestTaskViewController implements Initializable {
     }
 
     private void loadTasks() {
-        tableTask.setItems(FXCollections.observableArrayList(ctrl.getHarvestTasks()));
+        tableTask.setItems(FXCollections.observableArrayList(ctrl.getUncompletedTasksForCurrentDept()));
         selectedTask = null;
         btnComplete.setDisable(true);
         tableReservation.getItems().clear();

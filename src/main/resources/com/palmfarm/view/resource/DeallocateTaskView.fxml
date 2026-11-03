@@ -29,6 +29,9 @@
                 <placeholder>
                     <Label style="-fx-text-fill: #88aa88;" text="ไม่มีใบสั่งงาน ที่จัดสรรแล้วและรอมอบหมาย" />
                 </placeholder>
+            <columnResizePolicy>
+               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
             </TableView>
 
             <Label style="-fx-text-fill: #aaccaa; -fx-font-weight: bold;" text="ทรัพยากรที่จัดสรรให้ใบสั่งงานนี้:" />
@@ -44,6 +47,9 @@
                 <placeholder>
                     <Label style="-fx-text-fill: #88aa88;" text="เลือกใบสั่งงาน เพื่อดูทรัพยากรที่จัดสรร" />
                 </placeholder>
+            <columnResizePolicy>
+               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
             </TableView>
 
             <HBox alignment="CENTER_LEFT" spacing="10">

@@ -40,7 +40,6 @@ public class LoginController {
         switch (dept) {
             case "RESOURCE" -> new ResourceWindow().show();
             case "PALM_CARE" -> new PalmCareWindow().show();
-            case "QUALITY" -> new QualityWindow().show();
             case "ACCOUNTING" -> new AccountingWindow().show();
             case "HARVEST" -> new HarvestWindow().show();
             case "CUTTING" -> new CuttingWindow().show();

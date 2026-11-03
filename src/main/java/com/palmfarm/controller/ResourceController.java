@@ -483,4 +483,141 @@ public class ResourceController {
     public String getErrorMessage()   { return errorMessage; }
     public String getSuccessMessage() { return successMessage; }
     public void clearMessages()       { errorMessage = ""; successMessage = ""; }
+
+    // ═══════════════════════════════════════════════
+    // UC9: เพิ่มพนักงาน / UC10: แก้ไขพนักงาน
+    // ═══════════════════════════════════════════════
+
+    public boolean updateEmployee(EmployeeModel emp) {
+        String sql = "UPDATE employee SET first_name=?, last_name=?, department=?, position=?, phone=? " +
+                     "WHERE national_id=?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, empMC.getFirstName(emp));
+            ps.setString(2, empMC.getLastName(emp));
+            ps.setString(3, empMC.getDepartment(emp));
+            ps.setString(4, empMC.getPosition(emp));
+            ps.setString(5, empMC.getPhone(emp));
+            ps.setString(6, empMC.getNationalId(emp));
+            ps.executeUpdate();
+            successMessage = "แก้ไขข้อมูลพนักงานสำเร็จ";
+            return true;
+        } catch (SQLException e) { errorMessage = e.getMessage(); return false; }
+    }
+
+    // ═══════════════════════════════════════════════
+    // UC11: เพิ่มสวนปาล์ม / UC12: แก้ไขสวนปาล์ม
+    // ═══════════════════════════════════════════════
+
+    public boolean addPlantation(PlantationModel p) {
+        String sql = "INSERT INTO palm_plantation (name, area_rai, location) VALUES (?,?,?)";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, plantation().getName(p));
+            ps.setDouble(2, plantation().getAreaRai(p));
+            ps.setString(3, plantation().getLocation(p));
+            ps.executeUpdate();
+            successMessage = "เพิ่มสวนปาล์มสำเร็จ";
+            return true;
+        } catch (SQLException e) { errorMessage = e.getMessage(); return false; }
+    }
+
+    public boolean updatePlantation(PlantationModel p) {
+        String sql = "UPDATE palm_plantation SET name=?, area_rai=?, location=? WHERE plantation_id=?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, plantation().getName(p));
+            ps.setDouble(2, plantation().getAreaRai(p));
+            ps.setString(3, plantation().getLocation(p));
+            ps.setInt(4,    plantation().getPlantationId(p));
+            ps.executeUpdate();
+            successMessage = "แก้ไขสวนปาล์มสำเร็จ";
+            return true;
+        } catch (SQLException e) { errorMessage = e.getMessage(); return false; }
+    }
+
+    // ═══════════════════════════════════════════════
+    // UC13: เพิ่มรถ / UC14: แก้ไขรถ
+    // ═══════════════════════════════════════════════
+
+    public boolean addVehicle(ResourceModel r) {
+        try (Connection con = DBConnection.getConnection()) {
+            con.setAutoCommit(false);
+            try {
+                PreparedStatement ps1 = con.prepareStatement(
+                    "INSERT INTO resource (resource_type, status) VALUES ('VEHICLE','available')",
+                    java.sql.Statement.RETURN_GENERATED_KEYS);
+                ps1.executeUpdate();
+                ResultSet rs = ps1.getGeneratedKeys();
+                rs.next();
+                int newId = rs.getInt(1);
+                PreparedStatement ps2 = con.prepareStatement(
+                    "INSERT INTO vehicle (resource_id, license_plate, vehicle_size, seat_count) VALUES (?,?,?,?)");
+                ps2.setInt(1, newId);
+                ps2.setString(2, resource().getLicensePlate(r));
+                ps2.setString(3, resource().getVehicleSize(r));
+                ps2.setInt(4,    resource().getSeatCount(r));
+                ps2.executeUpdate();
+                con.commit();
+                successMessage = "เพิ่มรถสำเร็จ";
+                return true;
+            } catch (SQLException e) { con.rollback(); errorMessage = e.getMessage(); return false; }
+        } catch (SQLException e) { errorMessage = e.getMessage(); return false; }
+    }
+
+    public boolean updateVehicle(ResourceModel r) {
+        String sql = "UPDATE vehicle SET license_plate=?, vehicle_size=?, seat_count=? WHERE resource_id=?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, resource().getLicensePlate(r));
+            ps.setString(2, resource().getVehicleSize(r));
+            ps.setInt(3,    resource().getSeatCount(r));
+            ps.setInt(4,    resource().getResourceId(r));
+            ps.executeUpdate();
+            successMessage = "แก้ไขข้อมูลรถสำเร็จ";
+            return true;
+        } catch (SQLException e) { errorMessage = e.getMessage(); return false; }
+    }
+
+    // ═══════════════════════════════════════════════
+    // UC15: เพิ่มอุปกรณ์ / UC16: แก้ไขอุปกรณ์
+    // ═══════════════════════════════════════════════
+
+    public boolean addEquipment(ResourceModel r) {
+        try (Connection con = DBConnection.getConnection()) {
+            con.setAutoCommit(false);
+            try {
+                PreparedStatement ps1 = con.prepareStatement(
+                    "INSERT INTO resource (resource_type, status) VALUES ('EQUIPMENT','available')",
+                    java.sql.Statement.RETURN_GENERATED_KEYS);
+                ps1.executeUpdate();
+                ResultSet rs = ps1.getGeneratedKeys();
+                rs.next();
+                int newId = rs.getInt(1);
+                PreparedStatement ps2 = con.prepareStatement(
+                    "INSERT INTO equipment (resource_id, equip_id, equipment_name) VALUES (?,?,?)");
+                ps2.setInt(1, newId);
+                ps2.setString(2, resource().getEquipId(r));
+                ps2.setString(3, resource().getEquipmentName(r));
+                ps2.executeUpdate();
+                con.commit();
+                successMessage = "เพิ่มอุปกรณ์สำเร็จ";
+                return true;
+            } catch (SQLException e) { con.rollback(); errorMessage = e.getMessage(); return false; }
+        } catch (SQLException e) { errorMessage = e.getMessage(); return false; }
+    }
+
+    public boolean updateEquipment(ResourceModel r) {
+        String sql = "UPDATE equipment SET equip_id=?, equipment_name=? WHERE resource_id=?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, resource().getEquipId(r));
+            ps.setString(2, resource().getEquipmentName(r));
+            ps.setInt(3,    resource().getResourceId(r));
+            ps.executeUpdate();
+            successMessage = "แก้ไขข้อมูลอุปกรณ์สำเร็จ";
+            return true;
+        } catch (SQLException e) { errorMessage = e.getMessage(); return false; }
+    }
+
 }

@@ -19,6 +19,7 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import com.palmfarm.util.ReportExporter;
 import java.util.ResourceBundle;
 
 public class AssignResourceViewController implements Initializable {
@@ -175,6 +176,48 @@ public class AssignResourceViewController implements Initializable {
         loadResources();
         loadReservations();
         refreshTaskCombo();
+    }
+
+    @FXML public void handleExport(ActionEvent e) {
+        // export รายการจัดสรรทรัพยากรทั้งหมดของทุก task ที่จัดสรรแล้ว
+        var tasks = ctrl.getAllTasks();
+        if (tasks.isEmpty()) {
+            lblMsg.setStyle("-fx-text-fill:#ff8888;");
+            lblMsg.setText("ไม่มีข้อมูลสำหรับ export");
+            return;
+        }
+        int[] widths = {8, 26, 22, 18, 22, 12};
+        String[] headers = {"Task ID", "Description", "Resource Name", "Type", "Plantation", "Date"};
+        StringBuilder sb = ReportExporter.header("Resource Allocation Report / รายงานการจัดสรรทรัพยากร");
+        int total = 0;
+        for (var t : tasks) {
+            if (!ctrl.task().isAllocated(t)) continue;
+            var rls = ctrl.getReservationsByTask(ctrl.task().getTaskId(t));
+            if (rls.isEmpty()) continue;
+            sb.append(ReportExporter.separator(widths)).append("\n");
+            sb.append(ReportExporter.row(headers, widths)).append("\n");
+            sb.append(ReportExporter.separator(widths)).append("\n");
+            for (var rl : rls) {
+                String[] row = {
+                    String.valueOf(ctrl.task().getTaskId(t)),
+                    ctrl.task().getDescription(t),
+                    ctrl.rl().getResourceName(rl),
+                    ctrl.rl().getResourceType(rl),
+                    ctrl.task().getPlantationName(t),
+                    ctrl.rl().getDate(rl)
+                };
+                sb.append(ReportExporter.row(row, widths)).append("\n");
+                total++;
+            }
+        }
+        sb.append(ReportExporter.separator(widths)).append("\n");
+        sb.append(ReportExporter.footer(total));
+
+        boolean saved = ReportExporter.saveToFile(
+            tableResource.getScene().getWindow(),
+            "resource_allocation_report.txt", sb.toString());
+        lblMsg.setStyle(saved ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#aaaaaa;");
+        lblMsg.setText(saved ? "Export สำเร็จ" : "ยกเลิก");
     }
 
     @FXML public void handleRefresh(ActionEvent e) {

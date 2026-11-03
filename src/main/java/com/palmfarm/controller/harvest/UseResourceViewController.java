@@ -73,7 +73,7 @@ public class UseResourceViewController implements Initializable {
     }
 
     private void loadTasks() {
-        tableTask.setItems(FXCollections.observableArrayList(ctrl.getHarvestTasks()));
+        tableTask.setItems(FXCollections.observableArrayList(ctrl.getUncompletedTasksForCurrentDept()));
         tableReservation.getItems().clear();
         selectedTask = null;
         btnMarkUsed.setDisable(true);

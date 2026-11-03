@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane style="-fx-background-color:#1a2a1a;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.palmfarm.controller.resource.ManageResourceViewController">
+  <top>
+    <HBox alignment="CENTER_RIGHT" style="-fx-padding:8 12;">
+      <Button onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 5 12;" text="รีเฟรช" />
+    </HBox>
+  </top>
+  <center>
+    <TabPane style="-fx-background-color:#1a2a1a;" tabClosingPolicy="UNAVAILABLE">
+
+      <!-- Tab: รถ -->
+      <Tab text="รถยนต์">
+        <HBox spacing="12" style="-fx-padding:12;">
+          <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <TableView fx:id="tableVehicle" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">
+              <columns>
+                <TableColumn fx:id="colVId" prefWidth="60" text="ID" />
+                <TableColumn fx:id="colVPlate" prefWidth="130" text="ทะเบียน" />
+                <TableColumn fx:id="colVSize" prefWidth="150" text="ขนาดรถ" />
+                <TableColumn fx:id="colVSeat" prefWidth="80" text="ที่นั่ง" />
+                <TableColumn fx:id="colVStatus" prefWidth="110" text="สถานะ" />
+              </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
+            </TableView>
+          </VBox>
+          <VBox prefWidth="240" spacing="6" style="-fx-background-color:#243224;-fx-padding:12;-fx-background-radius:8;">
+            <Label style="-fx-text-fill:#4CAF50;-fx-font-weight:bold;-fx-font-size:14px;" text="ข้อมูลรถ" />
+            <Separator />
+            <Label style="-fx-text-fill:#ccddcc;" text="ทะเบียน:" />
+            <TextField fx:id="txtVPlate" style="-fx-background-color:#2d3e2d;-fx-text-fill:white;" />
+            <Label style="-fx-text-fill:#ccddcc;" text="ขนาดรถ:" />
+            <TextField fx:id="txtVSize" promptText="เช่น รถบรรทุก 6 ล้อ" style="-fx-background-color:#2d3e2d;-fx-text-fill:white;" />
+            <Label style="-fx-text-fill:#ccddcc;" text="จำนวนที่นั่ง:" />
+            <TextField fx:id="txtVSeat" style="-fx-background-color:#2d3e2d;-fx-text-fill:white;" />
+            <Separator />
+            <HBox spacing="8">
+              <Button maxWidth="Infinity" onAction="#handleAddVehicle" style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="เพิ่มรถ" HBox.hgrow="ALWAYS" />
+              <Button maxWidth="Infinity" onAction="#handleUpdateVehicle" style="-fx-background-color:#FF9800;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="แก้ไข" HBox.hgrow="ALWAYS" />
+              <Button onAction="#handleExportVehicle" style="-fx-background-color:#795548;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="Export " />
+            </HBox>
+            <Label fx:id="lblVMsg" style="-fx-font-size:12px;" text="" wrapText="true" />
+          </VBox>
+        </HBox>
+      </Tab>
+
+      <!-- Tab: อุปกรณ์ -->
+      <Tab text="อุปกรณ์">
+        <HBox spacing="12" style="-fx-padding:12;">
+          <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <TableView fx:id="tableEquip" prefHeight="400.0" prefWidth="450.0" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">
+              <columns>
+                <TableColumn fx:id="colEId" prefWidth="60" text="ID" />
+                <TableColumn fx:id="colEEquipId" prefWidth="130" text="รหัสอุปกรณ์" />
+                <TableColumn fx:id="colEName" prefWidth="220" text="ชื่ออุปกรณ์" />
+                <TableColumn fx:id="colEStatus" prefWidth="110" text="สถานะ" />
+              </columns>
+            </TableView>
+          </VBox>
+          <VBox prefWidth="240" spacing="6" style="-fx-background-color:#243224;-fx-padding:12;-fx-background-radius:8;">
+            <Label style="-fx-text-fill:#4CAF50;-fx-font-weight:bold;-fx-font-size:14px;" text="ข้อมูลอุปกรณ์" />
+            <Separator />
+            <Label style="-fx-text-fill:#ccddcc;" text="รหัสอุปกรณ์:" />
+            <TextField fx:id="txtEEquipId" style="-fx-background-color:#2d3e2d;-fx-text-fill:white;" />
+            <Label style="-fx-text-fill:#ccddcc;" text="ชื่ออุปกรณ์:" />
+            <TextField fx:id="txtEName" style="-fx-background-color:#2d3e2d;-fx-text-fill:white;" />
+            <Separator />
+            <HBox spacing="8">
+              <Button maxWidth="Infinity" onAction="#handleAddEquip" style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="เพิ่มอุปกรณ์" HBox.hgrow="ALWAYS" />
+              <Button maxWidth="Infinity" onAction="#handleUpdateEquip" style="-fx-background-color:#FF9800;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="แก้ไข" HBox.hgrow="ALWAYS" />
+              <Button onAction="#handleExportEquip" style="-fx-background-color:#795548;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="Export " />
+            </HBox>
+            <Label fx:id="lblEMsg" style="-fx-font-size:12px;" text="" wrapText="true" />
+          </VBox>
+        </HBox>
+      </Tab>
+
+    </TabPane>
+  </center>
+</BorderPane>

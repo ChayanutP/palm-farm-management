@@ -23,6 +23,7 @@
           <Label fx:id="lblTaskDeadline" style="-fx-text-fill:#aaccaa;-fx-font-size:12px;" text="กำหนดส่ง: " />
         </VBox>
         <Region HBox.hgrow="ALWAYS" />
+        <Button onAction="#handleExport" style="-fx-background-color: #795548; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 5 12;" text="Export รายงาน" />
         <Button onAction="#handleRefresh" style="-fx-background-color:#607D8B;-fx-text-fill:white;-fx-cursor:hand;" text="รีเฟรช" />
       </HBox>
 
@@ -46,6 +47,9 @@
             <placeholder>
               <Label style="-fx-text-fill:#88aa88;" text="ไม่มีทรัพยากรที่พร้อมใช้งาน" />
             </placeholder>
+                  <columnResizePolicy>
+                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                  </columnResizePolicy>
           </TableView>
           <Label fx:id="lblMsg" style="-fx-font-size:12px;" text="" wrapText="true" />
         </VBox>
@@ -63,6 +67,9 @@
             <placeholder>
               <Label style="-fx-text-fill:#88aa88;" text="เลือกใบสั่งงานเพื่อดูรายการ" />
             </placeholder>
+                  <columnResizePolicy>
+                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                  </columnResizePolicy>
           </TableView>
         </VBox>
 

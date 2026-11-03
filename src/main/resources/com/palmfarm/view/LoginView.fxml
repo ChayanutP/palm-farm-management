@@ -8,9 +8,9 @@
 
 <VBox alignment="CENTER" spacing="20" style="-fx-background-color: #1a2a1a; -fx-padding: 40;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.palmfarm.controller.LoginViewController">
 
-    <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="ระบบจัดการสวนปาล์ม" />
+    <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="ระบบจัดสรรทรัพยากรสำหรับสวนปาล์ม" />
 
-    <Label style="-fx-font-size: 13px; -fx-text-fill: #88aa88;" text="Palm Farm Management System" />
+    <Label style="-fx-font-size: 13px; -fx-text-fill: #88aa88;" text="Palm Farm Resource Management System" />
 
     <VBox maxWidth="320" spacing="12" style="-fx-background-color: #243224; -fx-padding: 30; -fx-background-radius: 10;">
 
@@ -24,6 +24,4 @@
 
         <Button fx:id="btnLogin" maxWidth="Infinity" onAction="#handleLogin" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 5; -fx-cursor: hand;" text="เข้าสู่ระบบ" />
     </VBox>
-
-    <Label style="-fx-text-fill: #446644; -fx-font-size: 11px;" text="version 1.0  Palm Farm System" />
 </VBox>

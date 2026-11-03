@@ -187,128 +187,59 @@ INSERT INTO task
     (description, department, is_complete, is_allocated, is_ordered, requisition_status, work_ordered_date, deadline, plantation_id, created_by, assigned_to)
 VALUES
     -- ══════════════════════════════════════════════════
-    -- งานเก่าที่เสร็จแล้ว (is_complete=TRUE) — ไว้ทดสอบ getLatestTaskPerGroup
+    -- งานเก่าที่เสร็จแล้ว (is_complete=TRUE)
     -- ══════════════════════════════════════════════════
 
-    -- HARVEST / แปลง A — 3 รอบที่ผ่านมา
-    ('เก็บเกี่ยวปาล์มรอบ ก.ค.',       'HARVEST',   TRUE, TRUE, TRUE, TRUE, '2026-07-01', '2026-07-15', 1, '1100100000001', '1100100000005'),
-    ('เก็บเกี่ยวปาล์มรอบ ส.ค.',       'HARVEST',   TRUE, TRUE, TRUE, TRUE, '2026-08-01', '2026-08-15', 1, '1100100000001', '1100100000005'),
-    ('เก็บเกี่ยวปาล์มรอบ ก.ย.',       'HARVEST',   TRUE, TRUE, TRUE, TRUE, '2026-09-01', '2026-09-15', 1, '1100100000001', '1100100000005'),
+    -- [1] [เก่า] HARVEST/แปลง A: เก็บเกี่ยว ก.ค. → เสร็จแล้ว
+    ('เก็บเกี่ยวปาล์มรอบ ก.ค.',      'HARVEST',   TRUE,  TRUE,  TRUE,  TRUE,  '2026-07-01', '2026-07-15', 1, '1100100000001', '1100100000005'),
+    -- [2] [เก่า] HARVEST/แปลง A: เก็บเกี่ยว ส.ค. → เสร็จแล้ว
+    ('เก็บเกี่ยวปาล์มรอบ ส.ค.',      'HARVEST',   TRUE,  TRUE,  TRUE,  TRUE,  '2026-08-01', '2026-08-15', 1, '1100100000001', '1100100000005'),
+    -- [3] [เก่า] HARVEST/แปลง A: เก็บเกี่ยว ก.ย. → เสร็จแล้ว
+    ('เก็บเกี่ยวปาล์มรอบ ก.ย.',      'HARVEST',   TRUE,  TRUE,  TRUE,  TRUE,  '2026-09-01', '2026-09-15', 1, '1100100000001', '1100100000005'),
 
-    -- PALM_CARE / แปลง B — 2 รอบที่ผ่านมา
-    ('รดน้ำและใส่ปุ๋ยปาล์มแปลง B',    'PALM_CARE', TRUE, TRUE, TRUE, TRUE, '2026-08-03', '2026-08-10', 2, '1100100000001', '1100100000002'),
-    ('รดน้ำและใส่ปุ๋ยปาล์มแปลง B',    'PALM_CARE', TRUE, TRUE, TRUE, TRUE, '2026-09-03', '2026-09-10', 2, '1100100000001', '1100100000002'),
+    -- [4] [เก่า] PALM_CARE/แปลง B: รดน้ำ ส.ค. → เสร็จแล้ว
+    ('รดน้ำและใส่ปุ๋ยปาล์มแปลง B',   'PALM_CARE', TRUE,  TRUE,  TRUE,  TRUE,  '2026-08-03', '2026-08-10', 2, '1100100000001', '1100100000002'),
+    -- [5] [เก่า] PALM_CARE/แปลง B: รดน้ำ ก.ย. → เสร็จแล้ว
+    ('รดน้ำและใส่ปุ๋ยปาล์มแปลง B',   'PALM_CARE', TRUE,  TRUE,  TRUE,  TRUE,  '2026-09-03', '2026-09-10', 2, '1100100000001', '1100100000002'),
 
-    -- PALM_CARE / แปลง A — ยังไม่มีงานใหม่ (ทดสอบว่าแสดงงานเก่าแทน)
-    ('ดูแลและตัดแต่งปาล์มแปลง A',     'PALM_CARE', TRUE, TRUE, TRUE, TRUE, '2026-09-10', '2026-09-20', 1, '1100100000001', '1100100000002'),
+    -- [6] [เก่า] CUTTING/แปลง B: ตัดปาล์ม ก.ย. → เสร็จแล้ว
+    ('ตัดปาล์มแปลง B รอบ ก.ย.',     'CUTTING',   TRUE,  TRUE,  TRUE,  TRUE,  '2026-09-02', '2026-09-14', 2, '1100100000001', '1100100000006'),
 
-    -- CUTTING / แปลง B — 1 รอบที่ผ่านมา
-    ('ตัดปาล์มแปลง B รอบ ก.ย.',      'CUTTING',   TRUE, TRUE, TRUE, TRUE, '2026-09-02', '2026-09-14', 2, '1100100000001', '1100100000006'),
+    -- [7] [เก่า] HARVEST/แปลง B: ขนส่ง ก.ย. → เสร็จแล้ว
+    ('ขนส่งปาล์มแปลง B ไปโรงงาน',   'HARVEST',   TRUE,  TRUE,  TRUE,  TRUE,  '2026-09-08', '2026-09-20', 2, '1100100000001', '1100100000007'),
 
-    -- HARVEST / แปลง B — 1 รอบที่ผ่านมา
-    ('ขนส่งปาล์มแปลง B รอบ ก.ย.',    'HARVEST',   TRUE, TRUE, TRUE, TRUE, '2026-09-08', '2026-09-20', 2, '1100100000001', '1100100000007'),
-
-    -- CUTTING / แปลง C — ยังไม่มีงานใหม่ (ทดสอบ)
-    ('ตัดปาล์มแปลง C รอบ ก.ย.',      'CUTTING',   TRUE, TRUE, TRUE, TRUE, '2026-09-15', '2026-09-28', 3, '1100100000001', '1100100000006'),
+    -- [8] [เก่า] PALM_CARE/แปลง A: ดูแลปาล์ม ก.ย. → เสร็จแล้ว
+    ('ดูแลและตัดแต่งปาล์มแปลง A',    'PALM_CARE', TRUE,  TRUE,  TRUE,  TRUE,  '2026-09-10', '2026-09-20', 1, '1100100000001', '1100100000002'),
 
     -- ══════════════════════════════════════════════════
-    -- งานปัจจุบัน (deadline หลัง 25 ต.ค. 2026 ทุกงาน)
+    -- งานปัจจุบัน (ยังไม่เสร็จ)
     -- ══════════════════════════════════════════════════
 
-    -- [9]  HARVEST/แปลง A: เก็บเกี่ยว ต.ค. — จัดสรรแล้ว ส่งแล้ว รอเบิก
-    ('เก็บเกี่ยวปาล์มรอบ ต.ค.',       'HARVEST',   FALSE, TRUE,  TRUE,  FALSE, '2026-10-23', '2026-11-05', 1, '1100100000001', '1100100000005'),
+    -- [9] task [ปัจจุบัน]: HARVEST/แปลง A → เก็บเกี่ยว ต.ค. ยังไม่เสร็จ
+    ('เก็บเกี่ยวปาล์มรอบ ต.ค.',      'HARVEST',   FALSE, TRUE,  TRUE,  FALSE, '2026-10-22', '2026-11-05', 1, '1100100000001', '1100100000005'),
+    -- [10] task [ปัจจุบัน]: PALM_CARE/แปลง B → รดน้ำ ต.ค. ยังไม่เสร็จ
+    ('รดน้ำและใส่ปุ๋ยปาล์มแปลง B',   'PALM_CARE', FALSE, TRUE,  TRUE,  FALSE, '2026-10-22', '2026-11-03', 2, '1100100000001', '1100100000002'),
+    -- [11] task [ปัจจุบัน]: CUTTING/แปลง A → ตัดปาล์ม ต.ค. ยังไม่เสร็จ (ยังไม่ได้ส่งงาน assigned_to = NULL)
+    ('ตัดปาล์มแปลง A รอบ ต.ค.',     'CUTTING',   FALSE, FALSE, FALSE, FALSE, '2026-10-22', '2026-11-02', 1, '1100100000001', NULL),
+    -- [12] task [ปัจจุบัน]: HARVEST/แปลง B → ขนส่ง ต.ค. ยังไม่เสร็จ
+    ('ขนส่งปาล์มแปลง B ไปโรงงาน',   'HARVEST',   FALSE, TRUE,  TRUE,  FALSE, '2026-10-22', '2026-11-06', 2, '1100100000001', '1100100000007');
 
-    -- [10] PALM_CARE/แปลง B: รดน้ำ ต.ค. — จัดสรรแล้ว ส่งแล้ว รอเบิก
-    ('รดน้ำและใส่ปุ๋ยปาล์มแปลง B',    'PALM_CARE', FALSE, TRUE,  TRUE,  FALSE, '2026-10-23', '2026-11-03', 2, '1100100000001', '1100100000002'),
-
-    -- [11] HARVEST/แปลง B: ขนส่ง ต.ค. — จัดสรรแล้ว ส่งแล้ว รอเบิก
-    ('ขนส่งปาล์มแปลง B ไปโรงงาน',    'HARVEST',   FALSE, TRUE,  TRUE,  FALSE, '2026-10-23', '2026-11-06', 2, '1100100000001', '1100100000007'),
-
-    -- [12] CUTTING/แปลง A: ตัดปาล์ม ต.ค. — จัดสรรแล้ว ยังไม่ส่ง (ทดสอบ Deallocate / SendTask)
-    ('ตัดปาล์มแปลง A รอบ ต.ค.',      'CUTTING',   FALSE, TRUE,  FALSE, FALSE, '2026-10-23', '2026-11-02', 1, '1100100000001', NULL),
-
-    -- [13] PALM_CARE/แปลง C: ดูแลปาล์ม — ยังไม่จัดสรร ยังไม่ส่ง (ทดสอบ CreateTask / AssignResource)
-    ('ดูแลและตัดแต่งปาล์มแปลง C',     'PALM_CARE', FALSE, FALSE, FALSE, FALSE, '2026-10-23', '2026-11-10', 3, '1100100000001', NULL),
-
-    -- [14] CUTTING/แปลง B: ตัดปาล์ม — ยังไม่จัดสรร ยังไม่ส่ง (ทดสอบ CreateTask / AssignResource)
-    ('ตัดปาล์มแปลง B รอบ ต.ค.',      'CUTTING',   FALSE, FALSE, FALSE, FALSE, '2026-10-23', '2026-11-08', 2, '1100100000001', NULL);
-
--- 5. Reservation Lines
--- ใช้ subquery เพื่อหา task_id จริง แทนการ hardcode
--- Resource reference:
---   VEHICLE  : 1=รถบรรทุก 6ล้อ กข-1234, 3=รถบรรทุก 10ล้อ งง-8899
---              4=รถแทรกเตอร์ ตต-001, 6=รถกระบะ 4ประตู กข-5678, 7=รถกระบะ 2ประตู กข-9012
---   EQUIPMENT: 9=เครื่องตัดปาล์ม X200-01, 10=เครื่องตัดปาล์ม X200-02
---              11=มีดตัดทะลาย ชุด 1, 13=สายยางรดน้ำ ชุด A, 14=ปั๊มน้ำไฟฟ้า
-
--- HARVEST/แปลง A (เก็บเกี่ยว): เครื่องตัดปาล์ม X200-01 + มีดตัดทะลาย ชุด 1 (ไม่มีรถ)
-INSERT INTO reservation_line (task_id, resource_id, date, status)
-SELECT t.task_id, 9, '2026-10-23', 'pending' FROM task t
-JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-WHERE t.description = 'เก็บเกี่ยวปาล์มรอบ ต.ค.' AND t.department = 'HARVEST' AND p.name = 'แปลงปาล์ม A' AND t.is_complete = FALSE;
-
-INSERT INTO reservation_line (task_id, resource_id, date, status)
-SELECT t.task_id, 11, '2026-10-23', 'pending' FROM task t
-JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-WHERE t.description = 'เก็บเกี่ยวปาล์มรอบ ต.ค.' AND t.department = 'HARVEST' AND p.name = 'แปลงปาล์ม A' AND t.is_complete = FALSE;
-
--- PALM_CARE/แปลง B (รดน้ำใส่ปุ๋ย): สายยางรดน้ำ + ปั๊มน้ำไฟฟ้า
-INSERT INTO reservation_line (task_id, resource_id, date, status)
-SELECT t.task_id, 13, '2026-10-23', 'pending' FROM task t
-JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-WHERE t.description = 'รดน้ำและใส่ปุ๋ยปาล์มแปลง B' AND t.department = 'PALM_CARE' AND t.is_complete = FALSE;
-
-INSERT INTO reservation_line (task_id, resource_id, date, status)
-SELECT t.task_id, 14, '2026-10-23', 'pending' FROM task t
-JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-WHERE t.description = 'รดน้ำและใส่ปุ๋ยปาล์มแปลง B' AND t.department = 'PALM_CARE' AND t.is_complete = FALSE;
-
--- HARVEST/แปลง B (ขนส่ง): รถบรรทุก 10ล้อ + รถกระบะ (ไม่มีเครื่องมือ)
-INSERT INTO reservation_line (task_id, resource_id, date, status)
-SELECT t.task_id, 3, '2026-10-23', 'pending' FROM task t
-JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-WHERE t.description = 'ขนส่งปาล์มแปลง B ไปโรงงาน' AND t.department = 'HARVEST' AND t.is_complete = FALSE;
-
-INSERT INTO reservation_line (task_id, resource_id, date, status)
-SELECT t.task_id, 7, '2026-10-23', 'pending' FROM task t
-JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-WHERE t.description = 'ขนส่งปาล์มแปลง B ไปโรงงาน' AND t.department = 'HARVEST' AND t.is_complete = FALSE;
-
--- CUTTING/แปลง A (ตัดปาล์ม): เครื่องตัดปาล์ม X200-02 + มีดตัดทะลาย ชุด 2 + เลื่อยยนต์
-INSERT INTO reservation_line (task_id, resource_id, date, status)
-SELECT t.task_id, 10, '2026-10-23', 'pending' FROM task t
-JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-WHERE t.description = 'ตัดปาล์มแปลง A รอบ ต.ค.' AND t.department = 'CUTTING' AND t.is_complete = FALSE;
-
-INSERT INTO reservation_line (task_id, resource_id, date, status)
-SELECT t.task_id, 12, '2026-10-23', 'pending' FROM task t
-JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-WHERE t.description = 'ตัดปาล์มแปลง A รอบ ต.ค.' AND t.department = 'CUTTING' AND t.is_complete = FALSE;
-
-INSERT INTO reservation_line (task_id, resource_id, date, status)
-SELECT t.task_id, 16, '2026-10-23', 'pending' FROM task t
-JOIN palm_plantation p ON t.plantation_id = p.plantation_id
-WHERE t.description = 'ตัดปาล์มแปลง A รอบ ต.ค.' AND t.department = 'CUTTING' AND t.is_complete = FALSE;
-
--- อัปเดต resource status ตามที่จองไว้
-UPDATE resource SET status = 'reserved' WHERE resource_id IN (3, 7, 9, 10, 11, 12, 13, 14, 16);
-
--- อัปเดต task.is_allocated = TRUE สำหรับ task ที่มี reservation แล้ว
-UPDATE task SET is_allocated = TRUE WHERE task_id IN (
-    SELECT DISTINCT task_id FROM reservation_line
-);
+-- 5. Reservation Lines (อ้างอิงตาม task_id ของงานปัจจุบันที่จัดสรรแล้ว: 9, 10, 12)
+INSERT INTO reservation_line (task_id, resource_id, date, status) VALUES
+(9,  9,  '2026-10-22', 'pending'),
+(9,  6,  '2026-10-22', 'pending'),
+(10, 13, '2026-10-22', 'pending'),
+(12, 1,  '2026-10-22', 'pending');
+-- อัปเดตสถานะ resource ตามการจอง
+UPDATE resource SET status = 'reserved' WHERE resource_id IN (1, 6, 9, 13);
 
 -- 6. Bills (เปลี่ยนจาก plantation_id เป็น stored_by ที่เชื่อมกับพนักงานบัญชี)
 -- ยังไม่จัดเก็บ (is_stored=FALSE, stored_by=NULL)
--- bills ที่ยังไม่จัดเก็บ (is_stored=FALSE) — รอกดจัดเก็บในหน้า Store Bill
--- bill_image_path ใช้ path สัมพัทธ์จาก working directory (root ของโปรเจกต์)
--- วางรูปไว้ที่: src/main/resources/bills/
 INSERT INTO bills (bill_image_path, is_stored, stored_by) VALUES
 ('src/main/resources/bills/bill_unstored_001.png', FALSE, NULL),
 ('src/main/resources/bills/bill_unstored_002.png', FALSE, NULL);
 
--- bills ที่จัดเก็บแล้ว (is_stored=TRUE) พร้อมข้อมูลครบถ้วน
+-- จัดเก็บแล้วโดยพนักงานบัญชี '1100100000004' (is_stored=TRUE)
 INSERT INTO bills (bill_number, bill_image_path, is_stored, sale_date, buyer_name, palm_quantity, price_per_unit, total_amount, stored_by) VALUES
--- stored_by = พนักงาน HARVEST ที่ขนส่งและส่งบิล
 ('BILL-2026-001', 'src/main/resources/bills/bill_001.png', TRUE, '2026-09-20', 'Palm Oil Factory Co., Ltd.', 5000.00, 6.50, 32500.00, '1100100000007'),
 ('BILL-2026-002', 'src/main/resources/bills/bill_002.png', TRUE, '2026-09-28', 'Thai Palm Oil Co., Ltd.',    3200.00, 6.80, 21760.00, '1100100000007');
