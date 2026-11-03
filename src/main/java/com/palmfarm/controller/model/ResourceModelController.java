@@ -150,6 +150,42 @@ public class ResourceModelController {
     }
 
     // ─────────────────────────────────────────
+    // SET ALL
+    // ─────────────────────────────────────────
+
+    /** ใช้ตอน Add Vehicle — กำหนด type พร้อมข้อมูลรถครบชุด */
+    public void setAllNewVehicle(ResourceModel r,
+                                 String plate, String size, int seatCount) {
+        r.resource_type = "VEHICLE";
+        r.license_plate = plate;
+        r.vehicle_size  = size;
+        r.seat_count    = seatCount;
+    }
+
+    /** ใช้ตอน Update Vehicle — ไม่แตะ resource_type */
+    public void setAllVehicle(ResourceModel r,
+                              String plate, String size, int seatCount) {
+        r.license_plate = plate;
+        r.vehicle_size  = size;
+        r.seat_count    = seatCount;
+    }
+
+    /** ใช้ตอน Add Equipment — กำหนด type พร้อมข้อมูลอุปกรณ์ครบชุด */
+    public void setAllNewEquipment(ResourceModel r,
+                                   String equipId, String name) {
+        r.resource_type  = "EQUIPMENT";
+        r.equip_id       = equipId;
+        r.equipment_name = name;
+    }
+
+    /** ใช้ตอน Update Equipment — ไม่แตะ resource_type */
+    public void setAllEquipment(ResourceModel r,
+                                String equipId, String name) {
+        r.equip_id       = equipId;
+        r.equipment_name = name;
+    }
+
+    // ─────────────────────────────────────────
     // FACTORY / MAPPER
     // ─────────────────────────────────────────
 

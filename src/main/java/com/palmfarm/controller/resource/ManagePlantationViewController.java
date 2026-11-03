@@ -67,12 +67,10 @@ public class ManagePlantationViewController implements Initializable {
         catch (NumberFormatException ex) { return "พื้นที่ต้องเป็นตัวเลข"; }
         if (areaVal <= 0)       return "พื้นที่ต้องมากกว่า 0";
 
-        // ตรวจชื่อซ้ำ
         List<PlantationModel> all = ctrl.getAllPlantations();
         for (PlantationModel p : all) {
             String existing = ctrl.plantation().getName(p);
             if (existing.equalsIgnoreCase(name)) {
-                // ถ้าเป็น update และชื่อเดิมของตัวเอง → ไม่ซ้ำ
                 if (!isAdd && selectedPlantation != null &&
                     ctrl.plantation().getPlantationId(p) == ctrl.plantation().getPlantationId(selectedPlantation))
                     continue;
@@ -89,9 +87,8 @@ public class ManagePlantationViewController implements Initializable {
         if (err != null) { showError(err); return; }
 
         PlantationModel p = ctrl.plantation().createEmpty();
-        ctrl.plantation().setName(p,     name);
-        ctrl.plantation().setAreaRai(p,  Double.parseDouble(area));
-        ctrl.plantation().setLocation(p, txtLocation.getText().trim());
+        ctrl.plantation().setAll(p, name,
+            Double.parseDouble(area), txtLocation.getText().trim());
         boolean ok = ctrl.addPlantation(p);
         show(ok); if (ok) loadPlantations();
     }
@@ -103,13 +100,11 @@ public class ManagePlantationViewController implements Initializable {
         String err  = validate(name, area, false);
         if (err != null) { showError(err); return; }
 
-        ctrl.plantation().setName(selectedPlantation,     name);
-        ctrl.plantation().setAreaRai(selectedPlantation,  Double.parseDouble(area));
-        ctrl.plantation().setLocation(selectedPlantation, txtLocation.getText().trim());
+        ctrl.plantation().setAll(selectedPlantation, name,
+            Double.parseDouble(area), txtLocation.getText().trim());
         boolean ok = ctrl.updatePlantation(selectedPlantation);
         show(ok); if (ok) loadPlantations();
     }
-
 
     @FXML public void handleExport(ActionEvent e) {
         var list = ctrl.getAllPlantations();

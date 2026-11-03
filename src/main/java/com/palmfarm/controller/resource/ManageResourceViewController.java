@@ -130,10 +130,9 @@ public class ManageResourceViewController implements Initializable {
         if (err != null) { vError(err); return; }
 
         ResourceModel r = ctrl.resource().createEmpty();
-        ctrl.resource().setResourceType(r, "VEHICLE");
-        ctrl.resource().setLicensePlate(r, plate);
-        ctrl.resource().setVehicleSize(r,  txtVSize.getText().trim());
-        ctrl.resource().setSeatCount(r,    seat.isBlank() ? 2 : Integer.parseInt(seat));
+        ctrl.resource().setAllNewVehicle(r, plate,
+            txtVSize.getText().trim(),
+            seat.isBlank() ? 2 : Integer.parseInt(seat));
         boolean ok = ctrl.addVehicle(r);
         lblVMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#ff8888;");
         lblVMsg.setText(ok ? ctrl.getSuccessMessage() : ctrl.getErrorMessage());
@@ -148,9 +147,9 @@ public class ManageResourceViewController implements Initializable {
         String err   = validateVehicle(plate, seat, false);
         if (err != null) { vError(err); return; }
 
-        ctrl.resource().setLicensePlate(selectedVehicle, plate);
-        ctrl.resource().setVehicleSize(selectedVehicle,  txtVSize.getText().trim());
-        ctrl.resource().setSeatCount(selectedVehicle,    seat.isBlank() ? 2 : Integer.parseInt(seat));
+        ctrl.resource().setAllVehicle(selectedVehicle, plate,
+            txtVSize.getText().trim(),
+            seat.isBlank() ? 2 : Integer.parseInt(seat));
         boolean ok = ctrl.updateVehicle(selectedVehicle);
         lblVMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#ff8888;");
         lblVMsg.setText(ok ? ctrl.getSuccessMessage() : ctrl.getErrorMessage());
@@ -164,9 +163,8 @@ public class ManageResourceViewController implements Initializable {
         if (err != null) { eError(err); return; }
 
         ResourceModel r = ctrl.resource().createEmpty();
-        ctrl.resource().setResourceType(r, "EQUIPMENT");
-        ctrl.resource().setEquipId(r,       txtEEquipId.getText().trim());
-        ctrl.resource().setEquipmentName(r, name);
+        ctrl.resource().setAllNewEquipment(r,
+            txtEEquipId.getText().trim(), name);
         boolean ok = ctrl.addEquipment(r);
         lblEMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#ff8888;");
         lblEMsg.setText(ok ? ctrl.getSuccessMessage() : ctrl.getErrorMessage());
@@ -180,8 +178,8 @@ public class ManageResourceViewController implements Initializable {
         String err  = validateEquip(name, false);
         if (err != null) { eError(err); return; }
 
-        ctrl.resource().setEquipId(selectedEquip,       txtEEquipId.getText().trim());
-        ctrl.resource().setEquipmentName(selectedEquip, name);
+        ctrl.resource().setAllEquipment(selectedEquip,
+            txtEEquipId.getText().trim(), name);
         boolean ok = ctrl.updateEquipment(selectedEquip);
         lblEMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#ff8888;");
         lblEMsg.setText(ok ? ctrl.getSuccessMessage() : ctrl.getErrorMessage());

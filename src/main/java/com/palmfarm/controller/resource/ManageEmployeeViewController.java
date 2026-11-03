@@ -87,7 +87,6 @@ public class ManageEmployeeViewController implements Initializable {
         if (txtLastName.getText().isBlank())        return "กรุณากรอกนามสกุล";
         if (cbDept.getValue() == null)              return "กรุณาเลือกฝ่าย";
 
-        // ตรวจซ้ำ national_id และ username
         List<EmployeeModel> all = ctrl.getAllEmployees();
         for (EmployeeModel emp : all) {
             if (ctrl.employee().getNationalId(emp).equals(nationalId))
@@ -112,14 +111,10 @@ public class ManageEmployeeViewController implements Initializable {
         if (err != null) { showError(err); return; }
 
         EmployeeModel emp = ctrl.employee().createEmpty();
-        ctrl.employee().setNationalId(emp, nationalId);
-        ctrl.employee().setUsername(emp,   username);
-        ctrl.employee().setPassword(emp,   txtPassword.getText().trim());
-        ctrl.employee().setFirstName(emp,  txtFirstName.getText().trim());
-        ctrl.employee().setLastName(emp,   txtLastName.getText().trim());
-        ctrl.employee().setDepartment(emp, cbDept.getValue());
-        ctrl.employee().setPosition(emp,   txtPosition.getText().trim());
-        ctrl.employee().setPhone(emp,      txtPhone.getText().trim());
+        ctrl.employee().setAllForAdd(emp,
+            nationalId, username, txtPassword.getText().trim(),
+            txtFirstName.getText().trim(), txtLastName.getText().trim(),
+            cbDept.getValue(), txtPosition.getText().trim(), txtPhone.getText().trim());
         boolean ok = ctrl.addEmployee(emp);
         show(ok); if (ok) loadEmployees();
     }
@@ -129,15 +124,12 @@ public class ManageEmployeeViewController implements Initializable {
         String err = validateUpdate();
         if (err != null) { showError(err); return; }
 
-        ctrl.employee().setFirstName(selectedEmp,  txtFirstName.getText().trim());
-        ctrl.employee().setLastName(selectedEmp,   txtLastName.getText().trim());
-        ctrl.employee().setDepartment(selectedEmp, cbDept.getValue());
-        ctrl.employee().setPosition(selectedEmp,   txtPosition.getText().trim());
-        ctrl.employee().setPhone(selectedEmp,      txtPhone.getText().trim());
+        ctrl.employee().setAllForUpdate(selectedEmp,
+            txtFirstName.getText().trim(), txtLastName.getText().trim(),
+            cbDept.getValue(), txtPosition.getText().trim(), txtPhone.getText().trim());
         boolean ok = ctrl.updateEmployee(selectedEmp);
         show(ok); if (ok) loadEmployees();
     }
-
 
     @FXML public void handleExport(ActionEvent e) {
         var list = ctrl.getAllEmployees();

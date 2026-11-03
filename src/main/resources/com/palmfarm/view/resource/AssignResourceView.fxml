@@ -24,7 +24,7 @@
         </VBox>
         <Region HBox.hgrow="ALWAYS" />
         <Button onAction="#handleExport" style="-fx-background-color: #795548; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 5 12;" text="Export รายงาน" />
-        <Button onAction="#handleRefresh" style="-fx-background-color:#607D8B;-fx-text-fill:white;-fx-cursor:hand;" text="รีเฟรช" />
+        <Button onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-cursor: hand;" text="รีเฟรช" />
       </HBox>
 
       <!-- Main content: resource table (left) + reservation list (right) -->

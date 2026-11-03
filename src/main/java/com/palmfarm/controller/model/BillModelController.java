@@ -145,6 +145,26 @@ public class BillModelController {
     }
 
     // 
+    // SET ALL
+    // 
+
+    /**
+     * ใช้ตอน Update บิล — กำหนดข้อมูลครบชุดและคำนวณ total_amount อัตโนมัติ
+     * แทนที่การเรียก setter 5 ตัวแยกกัน + computeAndSetTotalAmount
+     */
+    public void setAllBillData(BillModel b,
+                               String billNumber, String saleDate,
+                               String buyerName,
+                               double palmQuantity, double pricePerUnit) {
+        b.bill_number    = billNumber;
+        b.sale_date      = saleDate;
+        b.buyer_name     = buyerName;
+        b.palm_quantity  = palmQuantity;
+        b.price_per_unit = pricePerUnit;
+        b.total_amount   = palmQuantity * pricePerUnit;
+    }
+
+    // 
     // FACTORY / MAPPER
     // 
 

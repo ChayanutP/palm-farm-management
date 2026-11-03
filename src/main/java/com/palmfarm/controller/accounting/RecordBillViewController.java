@@ -108,11 +108,12 @@ public class RecordBillViewController implements Initializable {
     @FXML public void handleSave(ActionEvent e) {
         if (selectedBill == null) { lblMsg.setText("กรุณาเลือกบิล"); return; }
         try {
-            ctrl.bill().setBillNumber(selectedBill,  txtBillNumber.getText());
-            ctrl.bill().setSaleDate(selectedBill,    dpSaleDate.getValue() != null ? dpSaleDate.getValue().toString() : "");
-            ctrl.bill().setBuyerName(selectedBill,   txtBuyer.getText());
-            ctrl.bill().setPalmQuantity(selectedBill,  Double.parseDouble(txtQuantity.getText()));
-            ctrl.bill().setPricePerUnit(selectedBill,  Double.parseDouble(txtPriceUnit.getText()));
+            ctrl.bill().setAllBillData(selectedBill,
+                txtBillNumber.getText(),
+                dpSaleDate.getValue() != null ? dpSaleDate.getValue().toString() : "",
+                txtBuyer.getText(),
+                Double.parseDouble(txtQuantity.getText()),
+                Double.parseDouble(txtPriceUnit.getText()));
         } catch (NumberFormatException ex) { lblMsg.setText("ปริมาณและราคาต้องเป็นตัวเลข"); return; }
         ctrl.saveBillData(selectedBill);
         lblMsg.setText(ctrl.getSuccessMessage().isEmpty() ? ctrl.getErrorMessage() : ctrl.getSuccessMessage());

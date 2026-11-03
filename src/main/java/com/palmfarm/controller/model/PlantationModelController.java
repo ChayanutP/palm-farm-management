@@ -6,20 +6,38 @@ import java.sql.SQLException;
 
 public class PlantationModelController {
 
+    // ── GETTERS ──────────────────────────────────────────────────
+
     public int    getPlantationId(PlantationModel p) { return p.plantation_id; }
     public String getName(PlantationModel p)         { return p.name; }
     public double getAreaRai(PlantationModel p)      { return p.area_rai; }
     public String getLocation(PlantationModel p)     { return p.location; }
+
+    // ── SETTERS ──────────────────────────────────────────────────
 
     public void setPlantationId(PlantationModel p, int v)    { p.plantation_id = v; }
     public void setName(PlantationModel p, String v)         { p.name = v; }
     public void setAreaRai(PlantationModel p, double v)      { p.area_rai = v; }
     public void setLocation(PlantationModel p, String v)     { p.location = v; }
 
+    // ── SET ALL ──────────────────────────────────────────────────
+
+    /** ใช้ได้ทั้ง Add และ Update */
+    public void setAll(PlantationModel p,
+                       String name, double areaRai, String location) {
+        p.name     = name;
+        p.area_rai = areaRai;
+        p.location = location;
+    }
+
+    // ── HELPERS ──────────────────────────────────────────────────
+
     /** ชื่อย่อสำหรับ ComboBox: "ชื่อสวน (XX ไร่)" */
     public String getDisplayName(PlantationModel p) {
         return p.name + " (" + p.area_rai + " ไร่)";
     }
+
+    // ── FACTORY / MAPPER ─────────────────────────────────────────
 
     public PlantationModel createEmpty() { return new PlantationModel(); }
 

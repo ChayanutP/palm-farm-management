@@ -29,6 +29,34 @@ public class EmployeeModelController {
     public void setPosition(EmployeeModel e, String v)    { e.position = v; }
     public void setPhone(EmployeeModel e, String v)       { e.phone = v; }
 
+    // ── SET ALL ──────────────────────────────────────────────────
+
+    /** ใช้ตอน Add — กำหนดทุก field รวมถึง nationalId / username / password */
+    public void setAllForAdd(EmployeeModel e,
+                             String nationalId, String username, String password,
+                             String firstName,  String lastName,
+                             String department, String position, String phone) {
+        e.national_id = nationalId;
+        e.username    = username;
+        e.password    = password;
+        e.first_name  = firstName;
+        e.last_name   = lastName;
+        e.department  = department;
+        e.position    = position;
+        e.phone       = phone;
+    }
+
+    /** ใช้ตอน Update — ไม่แตะ nationalId / username / password */
+    public void setAllForUpdate(EmployeeModel e,
+                                String firstName, String lastName,
+                                String department, String position, String phone) {
+        e.first_name = firstName;
+        e.last_name  = lastName;
+        e.department = department;
+        e.position   = position;
+        e.phone      = phone;
+    }
+
     // ── FACTORY / MAPPER ─────────────────────────────────────────
 
     public EmployeeModel createEmpty() { return new EmployeeModel(); }
