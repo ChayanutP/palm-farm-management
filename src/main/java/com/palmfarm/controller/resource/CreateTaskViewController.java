@@ -41,7 +41,6 @@ public class CreateTaskViewController implements Initializable {
         cbDept.setItems(FXCollections.observableArrayList(
             "ฝ่ายจัดสรรทรัพยากร",
             "ฝ่ายดูแล",
-            "ฝ่ายตรวจสอบคุณภาพ",
             "ฝ่ายบัญชี",
             "ฝ่ายเก็บเกี่ยว/ขนส่ง",
             "ฝ่ายตัด/ปลูก"
@@ -142,7 +141,6 @@ public class CreateTaskViewController implements Initializable {
         return switch (display) {
             case "ฝ่ายจัดสรรทรัพยากร"   -> "RESOURCE";
             case "ฝ่ายดูแล"              -> "PALM_CARE";
-            case "ฝ่ายตรวจสอบคุณภาพ"   -> "QUALITY";
             case "ฝ่ายบัญชี"             -> "ACCOUNTING";
             case "ฝ่ายเก็บเกี่ยว/ขนส่ง" -> "HARVEST";
             case "ฝ่ายตัด/ปลูก"          -> "CUTTING";

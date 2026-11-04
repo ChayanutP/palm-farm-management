@@ -56,7 +56,6 @@ public class TaskModelController {
         return switch (t.department.toUpperCase()) {
             case "RESOURCE"   -> "ฝ่ายจัดสรรทรัพยากร";
             case "PALM_CARE"  -> "ฝ่ายดูแล";
-            case "QUALITY"    -> "ฝ่ายตรวจสอบคุณภาพ";
             case "ACCOUNTING" -> "ฝ่ายบัญชี";
             case "HARVEST"    -> "ฝ่ายเก็บเกี่ยว/ขนส่ง";
             case "CUTTING"    -> "ฝ่ายตัด/ปลูก";
