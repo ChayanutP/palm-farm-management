@@ -32,6 +32,15 @@ public class ReportExporter {
                center("Palm Farm Management System -- Authorized Document", 90) + "\n";
     }
 
+    /** ส่วนสรุปท้ายรายงาน (ใช้แทน footer เมื่อรายงานต้องการสรุปแบบกำหนดเอง) */
+    public static String summary(String... lines) {
+        StringBuilder sb = new StringBuilder(DLINE).append("\n").append("Summary:\n");
+        for (String l : lines) sb.append("- ").append(l).append("\n");
+        sb.append(DLINE).append("\n");
+        sb.append(center("Palm Farm Management System -- Authorized Document", 90)).append("\n");
+        return sb.toString();
+    }
+
     /** เปิด FileChooser แล้วบันทึก */
     public static boolean saveToFile(Window owner, String defaultName, String content) {
         FileChooser fc = new FileChooser();

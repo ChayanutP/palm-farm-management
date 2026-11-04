@@ -10,7 +10,7 @@ public class ReportWindow {
     public ReportWindow() {
         stage = WindowUtil.createStage(
             "/com/palmfarm/view/resource/ReportView.fxml",
-            "ออกรายงาน", 480, 660);
+            "ออกรายงาน", 480, 720);
     }
 
     public void show() { if (stage != null) stage.show(); }

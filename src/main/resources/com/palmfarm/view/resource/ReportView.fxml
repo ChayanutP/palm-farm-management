@@ -11,8 +11,9 @@
       <Label style="-fx-text-fill:#4CAF50;-fx-font-size:20px;-fx-font-weight:bold;" text="ออกรายงาน" />
       <Label style="-fx-text-fill:#aaccaa;-fx-font-size:12px;" wrapText="true" />
       <Label style="-fx-text-fill:#4CAF50;-fx-font-weight:bold;-fx-padding:8 0 0 0;" text="งานและการจัดสรร" />
-      <Button maxWidth="Infinity" onAction="#handleExportWorkOrder" style="-fx-background-color:#243224;-fx-text-fill:#ccddcc;-fx-font-size:14px;-fx-cursor:hand;-fx-padding:12 20;-fx-background-radius:8;-fx-alignment:CENTER_LEFT;" text="รายงานใบสั่งงาน" />
+      <Button maxWidth="Infinity" onAction="#handleExportWorkOrder" style="-fx-background-color:#243224;-fx-text-fill:#ccddcc;-fx-font-size:14px;-fx-cursor:hand;-fx-padding:12 20;-fx-background-radius:8;-fx-alignment:CENTER_LEFT;" text="รายงานใบสั่งงานล่าสุด" />
       <Button maxWidth="Infinity" onAction="#handleExportAllocation" style="-fx-background-color:#243224;-fx-text-fill:#ccddcc;-fx-font-size:14px;-fx-cursor:hand;-fx-padding:12 20;-fx-background-radius:8;-fx-alignment:CENTER_LEFT;" text="รายงานการจัดสรรทรัพยากร" />
+      <Button maxWidth="Infinity" onAction="#handleExportResponsible" style="-fx-background-color:#243224;-fx-text-fill:#ccddcc;-fx-font-size:14px;-fx-cursor:hand;-fx-padding:12 20;-fx-background-radius:8;-fx-alignment:CENTER_LEFT;" text="รายงานผู้รับผิดชอบงานและทรัพยากร" />
       <Label style="-fx-text-fill:#4CAF50;-fx-font-weight:bold;-fx-padding:8 0 0 0;" text="ทรัพยากร" />
       <Button maxWidth="Infinity" onAction="#handleExportVehicle" style="-fx-background-color:#243224;-fx-text-fill:#ccddcc;-fx-font-size:14px;-fx-cursor:hand;-fx-padding:12 20;-fx-background-radius:8;-fx-alignment:CENTER_LEFT;" text="รายชื่อรถ" />
       <Button maxWidth="Infinity" onAction="#handleExportEquip" style="-fx-background-color:#243224;-fx-text-fill:#ccddcc;-fx-font-size:14px;-fx-cursor:hand;-fx-padding:12 20;-fx-background-radius:8;-fx-alignment:CENTER_LEFT;" text="รายชื่ออุปกรณ์" />

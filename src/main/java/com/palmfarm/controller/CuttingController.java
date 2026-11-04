@@ -1,14 +1,5 @@
 package com.palmfarm.controller;
 
-import com.palmfarm.controller.model.*;
-import com.palmfarm.model.*;
-import com.palmfarm.util.DBConnection;
-import com.palmfarm.util.SessionManager;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
-
+/** ฝ่ายตัด/ปลูก — ใช้ logic รับคำสั่งและคืนทรัพยากรร่วมกับ PalmCareController */
 public class CuttingController extends PalmCareController {
-    }
+}

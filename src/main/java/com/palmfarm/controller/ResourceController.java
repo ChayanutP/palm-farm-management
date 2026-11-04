@@ -32,7 +32,7 @@ public class ResourceController {
     public List<PlantationModel> getAllPlantations() {
         List<PlantationModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM palm_plantation ORDER BY name");
+             PreparedStatement ps = con.prepareStatement("SELECT plantation_id, name, area_rai, location FROM palm_plantation ORDER BY name");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(plantationMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึงข้อมูลสวนไม่สำเร็จ: " + e.getMessage(); }
@@ -41,9 +41,13 @@ public class ResourceController {
 
     //  TASKS 
     private static final String TASK_SELECT =
-        "SELECT t.*, p.name AS plantation_name " +
+        "SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, " +
+        "       t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, t.assigned_to, " +
+        "       p.name AS plantation_name, " +
+        "       CONCAT(a.first_name, ' ', a.last_name) AS assignee_name " +
         "FROM task t " +
-        "LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id ";
+        "LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id " +
+        "LEFT JOIN employee a ON t.assigned_to = a.national_id ";
 
     public List<TaskModel> getAllTasks() {
         List<TaskModel> list = new ArrayList<>();
@@ -150,7 +154,7 @@ public class ResourceController {
     }
 
     public boolean createTask(TaskModel t) {
-        String checkSql = "SELECT COUNT(*) FROM task WHERE department=? AND plantation_id=? AND is_complete=FALSE";
+        String checkSql = "SELECT COUNT(task_id) FROM task WHERE department=? AND plantation_id=? AND is_complete=FALSE";
         try (Connection con = DBConnection.getConnection()) {
             try (PreparedStatement chk = con.prepareStatement(checkSql)) {
                 chk.setString(1, taskMC.getDepartment(t));
@@ -318,7 +322,7 @@ public class ResourceController {
     //  RESERVATION LINES (ดึงชื่อจาก Subclass ด้วย COALESCE)
     public List<ReservationLineModel> getReservationsByTask(int taskId) {
         List<ReservationLineModel> list = new ArrayList<>();
-        String sql = "SELECT rl.*, " +
+        String sql = "SELECT rl.reserved_id, rl.task_id, rl.resource_id, rl.date, rl.status, " +
                      "       COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name, " +
                      "       r.resource_type " +
                      "FROM reservation_line rl " +
@@ -393,7 +397,8 @@ public class ResourceController {
     public List<EmployeeModel> getAllEmployees() {
         List<EmployeeModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM employee ORDER BY department, national_id");
+             PreparedStatement ps = con.prepareStatement("SELECT national_id, username, password, first_name, last_name, department, position, phone " +
+                 "FROM employee ORDER BY department, national_id");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(empMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึงข้อมูลพนักงานไม่สำเร็จ: " + e.getMessage(); }

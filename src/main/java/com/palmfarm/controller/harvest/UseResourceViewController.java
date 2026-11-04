@@ -3,6 +3,9 @@ package com.palmfarm.controller.harvest;
 import com.palmfarm.controller.HarvestController;
 import com.palmfarm.model.ReservationLineModel;
 import com.palmfarm.model.TaskModel;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -10,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.util.Duration;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -33,12 +37,14 @@ public class UseResourceViewController implements Initializable {
 
     private final HarvestController ctrl = new HarvestController();
     private TaskModel selectedTask;
+    private Timeline autoRefresh;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setupTable();
         loadTasks();
         btnMarkUsed.setDisable(true);
+        startAutoRefresh();
     }
 
     private void setupTable() {
@@ -77,6 +83,42 @@ public class UseResourceViewController implements Initializable {
         tableReservation.getItems().clear();
         selectedTask = null;
         btnMarkUsed.setDisable(true);
+    }
+
+    /**
+     * หลายคนในฝ่ายเดียวกันเปิดหน้านี้พร้อมกันได้ — โหลดรายการใหม่ทุก 10 วินาที
+     * เพื่อให้งานที่ถูกรับไปแล้วหายจากรายการ และงานใหม่ที่เพิ่งส่งเข้ามาปรากฏ (หยุดอัตโนมัติเมื่อปิดหน้าต่าง)
+     */
+    private void startAutoRefresh() {
+        autoRefresh = new Timeline(new KeyFrame(Duration.seconds(10), ev -> reloadKeepSelection()));
+        autoRefresh.setCycleCount(Animation.INDEFINITE);
+        tableTask.sceneProperty().addListener((o, oldScene, scene) -> {
+            if (scene == null) return;
+            scene.windowProperty().addListener((o2, oldWin, win) -> {
+                if (win == null) return;
+                win.showingProperty().addListener((o3, was, showing) -> {
+                    if (showing) autoRefresh.play(); else autoRefresh.stop();
+                });
+                if (win.isShowing()) autoRefresh.play();
+            });
+        });
+    }
+
+    /** โหลดใหม่โดยพยายามคงแถวที่ผู้ใช้เลือกไว้ ถ้างานนั้นถูกคนอื่นรับไปแล้วจะแจ้งเตือน */
+    private void reloadKeepSelection() {
+        var fresh = ctrl.getUncompletedTasksForCurrentDept();
+        if (!ctrl.getErrorMessage().isEmpty()) { ctrl.clearMessages(); return; }   // โหลดไม่สำเร็จ: คงรายการเดิมไว้
+        int keepId = selectedTask == null ? -1 : ctrl.task().getTaskId(selectedTask);
+        tableTask.setItems(FXCollections.observableArrayList(fresh));
+        tableReservation.getItems().clear();
+        selectedTask = null;
+        btnMarkUsed.setDisable(true);
+        if (keepId == -1) return;
+        for (TaskModel t : fresh) {
+            if (ctrl.task().getTaskId(t) == keepId) { tableTask.getSelectionModel().select(t); return; }
+        }
+        lblMsg.setStyle("-fx-text-fill:#ffcc66;");
+        lblMsg.setText("งาน #" + keepId + " ถูกรับไปแล้วโดยผู้อื่น หรือไม่อยู่ในรายการแล้ว");
     }
 
     @FXML public void handleMarkUsed(ActionEvent e) {

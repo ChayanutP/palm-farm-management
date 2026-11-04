@@ -29,6 +29,14 @@ public class TaskModelController {
     public String getPlantationName(TaskModel t)  {
         return t.plantation_name != null ? t.plantation_name : "";
     }
+    public String getAssignedTo(TaskModel t)      { return t.assigned_to; }
+
+    /** ชื่อผู้รับผิดชอบ: แสดงเฉพาะเมื่อมีการรับคำสั่งแล้ว (requisition_status = TRUE) */
+    public String getResponsibleDisplay(TaskModel t) {
+        if (t.requisition_status && t.assignee_name != null && !t.assignee_name.isBlank())
+            return t.assignee_name;
+        return "ยังไม่มีผู้รับคำสั่ง";
+    }
 
     // 
     // SETTERS
@@ -52,14 +60,19 @@ public class TaskModelController {
 
     /** แปลงชื่อฝ่ายจาก DB → ภาษาไทยสำหรับแสดงผล */
     public String getDepartmentDisplay(TaskModel t) {
-        if (t.department == null) return "";
-        return switch (t.department.toUpperCase()) {
+        return getDepartmentDisplay(t.department);
+    }
+
+    /** แปลงรหัสฝ่าย (เช่น HARVEST) → ชื่อไทย ใช้ได้กับค่าที่ไม่ได้มาจาก TaskModel เช่น ฝ่ายของพนักงาน */
+    public String getDepartmentDisplay(String dept) {
+        if (dept == null) return "";
+        return switch (dept.toUpperCase()) {
             case "RESOURCE"   -> "ฝ่ายจัดสรรทรัพยากร";
             case "PALM_CARE"  -> "ฝ่ายดูแล";
             case "ACCOUNTING" -> "ฝ่ายบัญชี";
             case "HARVEST"    -> "ฝ่ายเก็บเกี่ยว/ขนส่ง";
             case "CUTTING"    -> "ฝ่ายตัด/ปลูก";
-            default           -> t.department;
+            default           -> dept;
         };
     }
 
@@ -107,6 +120,10 @@ public class TaskModelController {
         t.deadline           = rs.getString("deadline");
         t.plantation_id      = rs.getInt("plantation_id");
         try { t.plantation_name = rs.getString("plantation_name"); }
+        catch (SQLException ignored) {}
+        try { t.assigned_to = rs.getString("assigned_to"); }
+        catch (SQLException ignored) {}
+        try { t.assignee_name = rs.getString("assignee_name"); }
         catch (SQLException ignored) {}
         return t;
     }

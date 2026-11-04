@@ -1,19 +1,5 @@
 package com.palmfarm.controller;
 
-import com.palmfarm.controller.model.*;
-import com.palmfarm.model.*;
-import com.palmfarm.util.DBConnection;
-import com.palmfarm.util.SessionManager;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
-
+/** ฝ่ายเก็บเกี่ยว/ขนส่ง — ใช้ logic รับคำสั่งและคืนทรัพยากรร่วมกับ PalmCareController */
 public class HarvestController extends PalmCareController {
-
-    private final TaskModelController            taskMC = new TaskModelController();
-    private final ReservationLineModelController rlMC   = new ReservationLineModelController();
-    private final EmployeeModelController        empMC  = new EmployeeModelController();
-
 }

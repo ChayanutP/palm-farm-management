@@ -2,13 +2,17 @@ package com.palmfarm.controller.resource;
 
 import com.palmfarm.controller.AccountingController;
 import com.palmfarm.controller.ResourceController;
+import com.palmfarm.model.ResourceModel;
 import com.palmfarm.util.ReportExporter;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * หน้าออกรายงานของฝ่ายจัดสรรทรัพยากร — รวมปุ่ม Export ทุกรายงานไว้ที่เดียว
@@ -25,7 +29,13 @@ public class ReportViewController {
 
     @FXML public void handleExportWorkOrder(ActionEvent e) {
         List<String[]> rows = new ArrayList<>();
-        for (var t : ctrl.getAllTasks()) {
+        var tasks = ctrl.getLatestTaskPerGroup();
+        int done = 0, allocated = 0, ordered = 0, received = 0;
+        for (var t : tasks) {
+            if (ctrl.task().isComplete(t))             done++;
+            if (ctrl.task().isAllocated(t))            allocated++;
+            if (ctrl.task().isOrdered(t))              ordered++;
+            if (ctrl.task().getRequisitionStatus(t))   received++;
             rows.add(new String[] {
                 String.valueOf(ctrl.task().getTaskId(t)),
                 ctrl.task().getDescription(t),
@@ -36,10 +46,15 @@ public class ReportViewController {
                 ctrl.task().getDeadline(t)
             });
         }
-        exportTable("Work Order Report / รายงานใบสั่งงาน", "work_order_report.txt",
+        exportTable("Latest Work Order Report / รายงานใบสั่งงานล่าสุด", "latest_work_order_report.txt",
             new int[] {8, 32, 22, 18, 16, 18, 14},
             new String[] {"Task ID", "Description", "Plantation", "Department", "Status", "Assigned", "Deadline"},
-            rows, "ไม่มีข้อมูลใบสั่งงาน");
+            rows, "ไม่มีข้อมูลใบสั่งงาน",
+            List.of("ทั้งหมด: " + tasks.size() + " งาน",
+                    "เสร็จสิ้น: " + done + " งาน | กำลังดำเนินการ: " + (tasks.size() - done) + " งาน",
+                    "จัดสรรทรัพยากรแล้ว: " + allocated + " งาน",
+                    "มอบหมายแล้ว: " + ordered + " งาน",
+                    "มีผู้รับคำสั่งแล้ว: " + received + " งาน"));
     }
 
     /** รายงานนี้แยกตารางตาม task จึงไม่ใช้ exportTable() */
@@ -47,38 +62,86 @@ public class ReportViewController {
         int[] widths = {8, 26, 22, 18, 22, 12};
         String[] headers = {"Task ID", "Description", "Resource Name", "Type", "Plantation", "Date"};
         StringBuilder sb = ReportExporter.header("Resource Allocation Report / รายงานการจัดสรรทรัพยากร");
-        int total = 0;
-        for (var t : ctrl.getLatestTaskPerGroup()) {
+        int taskCount = 0, total = 0, vehicles = 0, equipments = 0;
+        for (var t : ctrl.getAllTasks()) {
             if (!ctrl.task().isAllocated(t)) continue;
             var rls = ctrl.getReservationsByTask(ctrl.task().getTaskId(t));
             if (rls.isEmpty()) continue;
+            taskCount++;
             sb.append(ReportExporter.separator(widths)).append("\n");
             sb.append(ReportExporter.row(headers, widths)).append("\n");
             sb.append(ReportExporter.separator(widths)).append("\n");
             for (var rl : rls) {
+                String type = ctrl.rl().getResourceType(rl);
                 String[] row = {
                     String.valueOf(ctrl.task().getTaskId(t)),
                     ctrl.task().getDescription(t),
                     ctrl.rl().getResourceName(rl),
-                    ctrl.rl().getResourceType(rl),
+                    type,
                     ctrl.task().getPlantationName(t),
                     ctrl.rl().getDate(rl)
                 };
                 sb.append(ReportExporter.row(row, widths)).append("\n");
                 total++;
+                if ("VEHICLE".equals(type)) vehicles++;
+                else if ("EQUIPMENT".equals(type)) equipments++;
             }
         }
         if (total == 0) { showError(emptyOr("ไม่มีข้อมูลการจัดสรรทรัพยากร")); return; }
         sb.append(ReportExporter.separator(widths)).append("\n");
-        sb.append(ReportExporter.footer(total));
+        sb.append(ReportExporter.summary(
+            "จำนวนใบสั่งงานที่มีการจัดสรรทรัพยากรแล้ว: " + taskCount + " งาน",
+            "รวมทรัพยากรที่ถูกจัดสรรทั้งหมด: " + total + " รายการ (VEHICLE: "
+                + vehicles + " คัน, EQUIPMENT: " + equipments + " ชิ้น)"));
         save("resource_allocation_report.txt", sb.toString());
+    }
+
+    /**
+     * รายงานผู้รับผิดชอบงานและทรัพยากรที่จัดสรร — แยกเป็นบล็อกต่อใบสั่งงาน พร้อมสรุปท้ายรายงาน
+     * ผู้รับผิดชอบคือพนักงานที่กดรับคำสั่ง (assigned_to) ถ้ายังไม่มีใครรับจะแสดง "ยังไม่มีผู้รับคำสั่ง"
+     */
+    @FXML public void handleExportResponsible(ActionEvent e) {
+        int[] widths = {46, 12, 17};
+        String[] headers = {"Resource Name", "Type", "Allocation Date"};
+        StringBuilder sb = ReportExporter.header("Task Responsibility Report / รายงานผู้รับผิดชอบงานและทรัพยากรที่จัดสรร");
+        int taskCount = 0, resourceCount = 0, vehicleCount = 0, equipmentCount = 0;
+        for (var t : ctrl.getAllTasks()) {
+            if (!ctrl.task().isAllocated(t)) continue;
+            var rls = ctrl.getReservationsByTask(ctrl.task().getTaskId(t));
+            if (rls.isEmpty()) continue;
+            taskCount++;
+            sb.append("\n[Task #").append(ctrl.task().getTaskId(t)).append("] ")
+              .append(ctrl.task().getDescription(t))
+              .append(" | ").append(ctrl.task().getPlantationName(t))
+              .append(" | ผู้รับผิดชอบ: ").append(ctrl.task().getResponsibleDisplay(t)).append("\n");
+            sb.append(ReportExporter.separator(widths)).append("\n");
+            sb.append(ReportExporter.row(headers, widths)).append("\n");
+            sb.append(ReportExporter.separator(widths)).append("\n");
+            for (var rl : rls) {
+                String type = ctrl.rl().getResourceType(rl);
+                sb.append(ReportExporter.row(new String[] {
+                    ctrl.rl().getResourceName(rl), type, ctrl.rl().getDate(rl)
+                }, widths)).append("\n");
+                resourceCount++;
+                if ("VEHICLE".equals(type)) vehicleCount++;
+                else if ("EQUIPMENT".equals(type)) equipmentCount++;
+            }
+            sb.append(ReportExporter.separator(widths)).append("\n");
+        }
+        if (taskCount == 0) { showError(emptyOr("ไม่มีข้อมูลการจัดสรรทรัพยากร")); return; }
+        sb.append("\n").append(ReportExporter.summary(
+            "จำนวนใบสั่งงานที่มีการจัดสรรทรัพยากรแล้ว: " + taskCount + " งาน",
+            "รวมทรัพยากรที่ถูกจัดสรรทั้งหมด: " + resourceCount + " รายการ (VEHICLE: "
+                + vehicleCount + " คัน, EQUIPMENT: " + equipmentCount + " ชิ้น)"));
+        save("task_responsibility_report.txt", sb.toString());
     }
 
     // ───────────────── ทรัพยากร ─────────────────
 
     @FXML public void handleExportVehicle(ActionEvent e) {
         List<String[]> rows = new ArrayList<>();
-        for (var r : ctrl.getResourcesByType("VEHICLE")) {
+        var vehicles = ctrl.getResourcesByType("VEHICLE");
+        for (var r : vehicles) {
             rows.add(new String[] {
                 String.valueOf(ctrl.resource().getResourceId(r)),
                 ctrl.resource().getLicensePlate(r),
@@ -90,12 +153,13 @@ public class ReportViewController {
         exportTable("Vehicle Report / รายงานรถยนต์ทั้งหมด", "vehicle_report.txt",
             new int[] {6, 20, 24, 8, 14},
             new String[] {"ID", "ทะเบียน", "ขนาดรถ", "ที่นั่ง", "สถานะ"},
-            rows, "ไม่มีข้อมูลรถ");
+            rows, "ไม่มีข้อมูลรถ", resourceSummary("รถ", "คัน", vehicles));
     }
 
     @FXML public void handleExportEquip(ActionEvent e) {
         List<String[]> rows = new ArrayList<>();
-        for (var r : ctrl.getResourcesByType("EQUIPMENT")) {
+        var equipments = ctrl.getResourcesByType("EQUIPMENT");
+        for (var r : equipments) {
             rows.add(new String[] {
                 String.valueOf(ctrl.resource().getResourceId(r)),
                 ctrl.resource().getEquipId(r),
@@ -106,16 +170,17 @@ public class ReportViewController {
         exportTable("Equipment Report / รายงานอุปกรณ์เครื่องมือทั้งหมด", "equipment_report.txt",
             new int[] {6, 16, 34, 14},
             new String[] {"ID", "รหัสอุปกรณ์", "ชื่ออุปกรณ์", "สถานะ"},
-            rows, "ไม่มีข้อมูลอุปกรณ์");
+            rows, "ไม่มีข้อมูลอุปกรณ์", resourceSummary("อุปกรณ์", "ชิ้น", equipments));
     }
-
-
 
     // ───────────────── ข้อมูลหลัก ─────────────────
 
     @FXML public void handleExportPlantation(ActionEvent e) {
         List<String[]> rows = new ArrayList<>();
-        for (var p : ctrl.getAllPlantations()) {
+        var plantations = ctrl.getAllPlantations();
+        double totalArea = 0;
+        for (var p : plantations) {
+            totalArea += ctrl.plantation().getAreaRai(p);
             rows.add(new String[] {
                 String.valueOf(ctrl.plantation().getPlantationId(p)),
                 ctrl.plantation().getName(p),
@@ -126,12 +191,17 @@ public class ReportViewController {
         exportTable("Plantation Report / รายงานสวนปาล์มทั้งหมด", "plantation_report.txt",
             new int[] {6, 28, 14, 36},
             new String[] {"ID", "ชื่อสวน", "พื้นที่ (ไร่)", "ที่ตั้ง"},
-            rows, "ไม่มีข้อมูลสวนปาล์ม");
+            rows, "ไม่มีข้อมูลสวนปาล์ม",
+            List.of("จำนวนแปลงทั้งหมด: " + plantations.size() + " แปลง",
+                    String.format(Locale.US, "พื้นที่รวม: %,.2f ไร่", totalArea)));
     }
 
     @FXML public void handleExportEmployee(ActionEvent e) {
         List<String[]> rows = new ArrayList<>();
-        for (var emp : ctrl.getAllEmployees()) {
+        var employees = ctrl.getAllEmployees();
+        Map<String, Integer> byDept = new LinkedHashMap<>();   // ตามลำดับฝ่ายที่ query เรียงมา
+        for (var emp : employees) {
+            byDept.merge(ctrl.task().getDepartmentDisplay(ctrl.employee().getDepartment(emp)), 1, Integer::sum);
             rows.add(new String[] {
                 ctrl.employee().getNationalId(emp),
                 ctrl.employee().getFullName(emp),
@@ -140,17 +210,27 @@ public class ReportViewController {
                 ctrl.employee().getPhone(emp)
             });
         }
+        List<String> summary = new ArrayList<>();
+        summary.add("พนักงานทั้งหมด: " + employees.size() + " คน");
+        List<String> parts = new ArrayList<>();
+        byDept.forEach((dept, n) -> parts.add(dept + ": " + n + " คน"));
+        for (int i = 0; i < parts.size(); i += 3)                // บรรทัดละไม่เกิน 3 ฝ่าย
+            summary.add(String.join(" | ", parts.subList(i, Math.min(i + 3, parts.size()))));
         exportTable("Employee Report / รายงานพนักงานทั้งหมด", "employee_report.txt",
             new int[] {15, 26, 18, 18, 14},
             new String[] {"บัตรประชาชน", "ชื่อ-สกุล", "ฝ่าย", "ตำแหน่ง", "โทรศัพท์"},
-            rows, "ไม่มีข้อมูลพนักงาน");
+            rows, "ไม่มีข้อมูลพนักงาน", summary);
     }
 
     // ───────────────── บัญชี ─────────────────
 
     @FXML public void handleExportBill(ActionEvent e) {
         List<String[]> rows = new ArrayList<>();
-        for (var b : acct.getRecordedBills()) {
+        var bills = acct.getRecordedBills();
+        double totalQty = 0, totalAmount = 0;
+        for (var b : bills) {
+            totalQty    += acct.bill().getPalmQuantity(b);
+            totalAmount += acct.bill().getTotalAmount(b);
             rows.add(new String[] {
                 String.valueOf(acct.bill().getBillId(b)),
                 acct.bill().getBillNumber(b),
@@ -164,7 +244,10 @@ public class ReportViewController {
         exportTable("Bill Report / รายงานบิลการขายผลผลิต", "bill_report.txt",
             new int[] {8, 18, 14, 28, 12, 12, 16},
             new String[] {"Bill ID", "Bill No.", "Sale Date", "Buyer", "Qty (kg)", "Price/kg", "Total (THB)"},
-            rows, "ไม่มีข้อมูลบิลสำหรับ export");
+            rows, "ไม่มีข้อมูลบิลสำหรับ export",
+            List.of("จำนวนบิลทั้งหมด: " + bills.size() + " ใบ",
+                    String.format(Locale.US, "ปริมาณปาล์มรวม: %,.0f กก.", totalQty),
+                    String.format(Locale.US, "มูลค่ารวม: %,.2f บาท", totalAmount)));
     }
 
     // ───────────────── helpers ─────────────────
@@ -172,6 +255,13 @@ public class ReportViewController {
     /** รายงานแบบตารางเดียว: header → หัวคอลัมน์ → แถว → footer → บันทึกไฟล์ */
     private void exportTable(String title, String fileName, int[] widths,
                              String[] headers, List<String[]> rows, String emptyMsg) {
+        exportTable(title, fileName, widths, headers, rows, emptyMsg, null);
+    }
+
+    /** ถ้าส่ง summary มา ท้ายรายงานจะแสดงส่วนสรุปแทน Total Records */
+    private void exportTable(String title, String fileName, int[] widths,
+                             String[] headers, List<String[]> rows, String emptyMsg,
+                             List<String> summary) {
         if (rows.isEmpty()) { showError(emptyOr(emptyMsg)); return; }
 
         StringBuilder sb = ReportExporter.header(title);
@@ -180,8 +270,29 @@ public class ReportViewController {
         sb.append(ReportExporter.separator(widths)).append("\n");
         for (String[] row : rows) sb.append(ReportExporter.row(row, widths)).append("\n");
         sb.append(ReportExporter.separator(widths)).append("\n");
-        sb.append(ReportExporter.footer(rows.size()));
+        sb.append(summary == null
+            ? ReportExporter.footer(rows.size())
+            : ReportExporter.summary(summary.toArray(new String[0])));
         save(fileName, sb.toString());
+    }
+
+    /**
+     * สรุปจำนวนทรัพยากรตามสถานะ (ใช้ร่วมกันระหว่างรายงานรถและอุปกรณ์)
+     * available = ว่าง | reserved = จัดสรรให้งานแล้วแต่ยังไม่เบิก | in_use = เบิกไปใช้งานแล้ว
+     */
+    private List<String> resourceSummary(String label, String unit, List<ResourceModel> list) {
+        int available = 0, reserved = 0, inUse = 0;
+        for (var r : list) {
+            String status = ctrl.resource().getStatus(r);
+            if ("available".equals(status))     available++;
+            else if ("reserved".equals(status)) reserved++;
+            else if ("in_use".equals(status))   inUse++;
+        }
+        return List.of(
+            label + "ทั้งหมด: " + list.size() + " " + unit,
+            "ว่าง: " + available + " " + unit,
+            "ถูกจอง (จัดสรรแล้ว ยังไม่เบิก): " + reserved + " " + unit,
+            "กำลังใช้งาน (เบิกแล้ว): " + inUse + " " + unit);
     }
 
     private void save(String fileName, String content) {
