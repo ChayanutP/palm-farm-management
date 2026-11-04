@@ -13,11 +13,6 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane style="-fx-background-color:#1a2a1a;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.palmfarm.controller.resource.ManageResourceViewController">
-  <top>
-    <HBox alignment="CENTER_RIGHT" style="-fx-padding:8 12;">
-      <Button onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 5 12;" text="รีเฟรช" />
-    </HBox>
-  </top>
   <center>
     <TabPane style="-fx-background-color:#1a2a1a;" tabClosingPolicy="UNAVAILABLE">
 
@@ -51,7 +46,6 @@
             <HBox spacing="8">
               <Button maxWidth="Infinity" onAction="#handleAddVehicle" style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="เพิ่มรถ" HBox.hgrow="ALWAYS" />
               <Button maxWidth="Infinity" onAction="#handleUpdateVehicle" style="-fx-background-color:#FF9800;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="แก้ไข" HBox.hgrow="ALWAYS" />
-              <Button onAction="#handleExportVehicle" style="-fx-background-color:#795548;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="Export " />
             </HBox>
             <Label fx:id="lblVMsg" style="-fx-font-size:12px;" text="" wrapText="true" />
           </VBox>
@@ -82,7 +76,6 @@
             <HBox spacing="8">
               <Button maxWidth="Infinity" onAction="#handleAddEquip" style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="เพิ่มอุปกรณ์" HBox.hgrow="ALWAYS" />
               <Button maxWidth="Infinity" onAction="#handleUpdateEquip" style="-fx-background-color:#FF9800;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="แก้ไข" HBox.hgrow="ALWAYS" />
-              <Button onAction="#handleExportEquip" style="-fx-background-color:#795548;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="Export " />
             </HBox>
             <Label fx:id="lblEMsg" style="-fx-font-size:12px;" text="" wrapText="true" />
           </VBox>

@@ -12,7 +12,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -43,7 +42,6 @@ public class SchedulingViewController implements Initializable {
     @FXML private TableColumn<TaskModel, Void>    colAction;   // ปุ่มเลื่อน
 
     @FXML private Label lblMsg;
-    @FXML private Button btnRefresh;
 
     private final ResourceController ctrl = new ResourceController();
 
@@ -176,9 +174,9 @@ public class SchedulingViewController implements Initializable {
                 lblPopupMsg.setText("กรุณาเลือกวันที่");
                 return;
             }
-            if (selected.isBefore(LocalDate.now().plusDays(10))) {
+            if (selected.isBefore(LocalDate.now())) {
                 lblPopupMsg.setStyle("-fx-text-fill: #ff8888; -fx-font-size: 11px;");
-                lblPopupMsg.setText("Deadline ต้องห่างจากวันนี้อย่างน้อย 10 วัน");
+                lblPopupMsg.setText("กรุณาเลือกวันที่ใหม่");
                 return;
             }
 
@@ -211,10 +209,6 @@ public class SchedulingViewController implements Initializable {
         popup.showAndWait();
     }
 
-    @FXML
-    public void handleRefresh() {
-        reqLatestOrdersByDeptAndGarden();
-    }
 
     private void showSuccess(String msg) {
         lblMsg.setStyle("-fx-text-fill: #88ff88; -fx-font-size: 12px;");

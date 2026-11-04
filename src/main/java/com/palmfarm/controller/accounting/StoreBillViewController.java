@@ -2,7 +2,6 @@ package com.palmfarm.controller.accounting;
 
 import com.palmfarm.controller.AccountingController;
 import com.palmfarm.model.BillModel;
-import com.palmfarm.util.SessionManager;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -28,7 +27,6 @@ public class StoreBillViewController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        var empMC = new com.palmfarm.controller.model.EmployeeModelController();
         setupTable();
         loadBills();
     }
@@ -82,5 +80,4 @@ public class StoreBillViewController implements Initializable {
             
     }
 
-    @FXML public void handleRefresh(ActionEvent e) { loadBills(); }
 }

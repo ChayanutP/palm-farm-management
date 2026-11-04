@@ -15,7 +15,6 @@
       <!-- ส่วนหัวข้อและปุ่มรีเฟรช -->
       <HBox alignment="CENTER_LEFT" spacing="8">
         <Label style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;" text="งานที่ได้รับมอบหมาย:" />
-        <Button onAction="#handleRefresh" style="-fx-background-color:#2196F3;-fx-text-fill:white;-fx-cursor:hand;" text="รีเฟรช" />
       </HBox>
       
       <!-- ตารางแสดง Task -->

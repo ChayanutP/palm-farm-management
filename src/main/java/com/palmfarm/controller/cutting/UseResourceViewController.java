@@ -98,5 +98,4 @@ public class UseResourceViewController implements Initializable {
         loadTasks();
     }
 
-    @FXML public void handleRefresh(ActionEvent e) { loadTasks(); lblMsg.setText(""); }
 }

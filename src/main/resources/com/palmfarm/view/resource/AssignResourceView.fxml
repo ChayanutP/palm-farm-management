@@ -22,9 +22,6 @@
           <Label fx:id="lblTaskPlantation" style="-fx-text-fill:#88cc88;-fx-font-size:12px;" text="สวน:" />
           <Label fx:id="lblTaskDeadline" style="-fx-text-fill:#aaccaa;-fx-font-size:12px;" text="กำหนดส่ง: " />
         </VBox>
-        <Region HBox.hgrow="ALWAYS" />
-        <Button onAction="#handleExport" style="-fx-background-color: #795548; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 5 12;" text="Export รายงาน" />
-        <Button onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-cursor: hand;" text="รีเฟรช" />
       </HBox>
 
       <!-- Main content: resource table (left) + reservation list (right) -->

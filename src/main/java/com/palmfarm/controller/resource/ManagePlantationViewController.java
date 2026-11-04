@@ -106,34 +106,7 @@ public class ManagePlantationViewController implements Initializable {
         show(ok); if (ok) loadPlantations();
     }
 
-    @FXML public void handleExport(ActionEvent e) {
-        var list = ctrl.getAllPlantations();
-        if (list.isEmpty()) { showError("ไม่มีข้อมูลสวนปาล์ม"); return; }
-        int[] widths = {6, 28, 14, 36};
-        String[] headers = {"ID", "ชื่อสวน", "พื้นที่ (ไร่)", "ที่ตั้ง"};
-        StringBuilder sb = com.palmfarm.util.ReportExporter.header(
-            "Plantation Report / รายงานสวนปาล์มทั้งหมด");
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.row(headers, widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        for (var p : list) {
-            String[] row = {
-                String.valueOf(ctrl.plantation().getPlantationId(p)),
-                ctrl.plantation().getName(p),
-                String.format("%.2f", ctrl.plantation().getAreaRai(p)),
-                ctrl.plantation().getLocation(p) != null ? ctrl.plantation().getLocation(p) : ""
-            };
-            sb.append(com.palmfarm.util.ReportExporter.row(row, widths)).append("\n");
-        }
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.footer(list.size()));
-        boolean ok = com.palmfarm.util.ReportExporter.saveToFile(
-            tablePlantation.getScene().getWindow(), "plantation_report.txt", sb.toString());
-        lblMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#aaaaaa;");
-        lblMsg.setText(ok ? "Export สำเร็จ" : "ยกเลิก");
-    }
 
-    @FXML public void handleRefresh(ActionEvent e) { loadPlantations(); }
 
     private void show(boolean ok) {
         lblMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#ff8888;");

@@ -14,7 +14,6 @@
 
             <HBox alignment="CENTER_LEFT" spacing="8">
                 <Label style="-fx-text-fill: #aaccaa; -fx-font-weight: bold; -fx-font-size: 13px;" text="ใบสั่งงานที่ยังไม่ได้มอบหมาย:" />
-                <Button onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white;                                -fx-cursor: hand; -fx-padding: 5 12;" text="รีเฟรช" />
             </HBox>
 
             <TableView fx:id="tableTask" style="-fx-background-color: #243224; -fx-control-inner-background: #243224;" VBox.vgrow="ALWAYS">

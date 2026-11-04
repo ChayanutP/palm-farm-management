@@ -17,7 +17,6 @@
       <VBox spacing="6" HBox.hgrow="ALWAYS">
         <HBox alignment="CENTER_LEFT" spacing="8">
           <Label style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;" text="รายชื่อพนักงาน:" />
-          <Button onAction="#handleRefresh" style="-fx-background-color:#607D8B;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:5 12;" text="รีเฟรช" />
         </HBox>
         <TableView fx:id="tableEmployee" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">
           <columns>
@@ -55,7 +54,6 @@
         <HBox spacing="8">
           <Button maxWidth="Infinity" onAction="#handleAdd" style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="เพิ่มพนักงาน" HBox.hgrow="ALWAYS" />
           <Button maxWidth="Infinity" onAction="#handleUpdate" style="-fx-background-color:#FF9800;-fx-text-fill:white;-fx-cursor:hand;-fx-padding:8;-fx-background-radius:5;" text="แก้ไข" HBox.hgrow="ALWAYS" />
-          <Button onAction="#handleExport" prefHeight="33.0" prefWidth="58.0" style="-fx-background-color: #795548; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 5 12;" text="Export" />
         </HBox>
         <Label fx:id="lblMsg" style="-fx-font-size:12px;" text="" wrapText="true" />
       </VBox>

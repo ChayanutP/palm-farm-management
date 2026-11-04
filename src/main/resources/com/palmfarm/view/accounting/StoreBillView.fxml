@@ -16,7 +16,6 @@
         <HBox spacing="8">
           <Button onAction="#handleUpload" style="-fx-background-color: orange; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 5 12;" text="อัปโหลดรูปบิล" />
           <Button onAction="#handleStore" style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;" text="จัดเก็บบิลที่เลือก" />
-          <Button onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-cursor: hand;" text="รีเฟรช" />
         </HBox>
         <Label fx:id="lblMsg" style="-fx-text-fill:#88ff88;" text="" />
         <TableView fx:id="tableUnstored" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">

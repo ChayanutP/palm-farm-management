@@ -187,62 +187,8 @@ public class ManageResourceViewController implements Initializable {
     }
 
 
-    @FXML public void handleExportVehicle(ActionEvent e) {
-        var list = tableVehicle.getItems();
-        if (list.isEmpty()) { vError("ไม่มีข้อมูลรถ"); return; }
-        int[] widths = {6, 20, 24, 8, 14};
-        String[] headers = {"ID", "ทะเบียน", "ขนาดรถ", "ที่นั่ง", "สถานะ"};
-        StringBuilder sb = com.palmfarm.util.ReportExporter.header(
-            "Vehicle Report / รายงานรถยนต์ทั้งหมด");
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.row(headers, widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        for (var r : list) {
-            String[] row = {
-                String.valueOf(ctrl.resource().getResourceId(r)),
-                ctrl.resource().getLicensePlate(r) != null ? ctrl.resource().getLicensePlate(r) : "",
-                ctrl.resource().getVehicleSize(r) != null ? ctrl.resource().getVehicleSize(r) : "",
-                String.valueOf(ctrl.resource().getSeatCount(r)),
-                ctrl.resource().getStatus(r)
-            };
-            sb.append(com.palmfarm.util.ReportExporter.row(row, widths)).append("\n");
-        }
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.footer(list.size()));
-        boolean ok = com.palmfarm.util.ReportExporter.saveToFile(
-            tableVehicle.getScene().getWindow(), "vehicle_report.txt", sb.toString());
-        lblVMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#aaaaaa;");
-        lblVMsg.setText(ok ? "Export สำเร็จ" : "ยกเลิก");
-    }
 
-    @FXML public void handleExportEquip(ActionEvent e) {
-        var list = tableEquip.getItems();
-        if (list.isEmpty()) { eError("ไม่มีข้อมูลอุปกรณ์"); return; }
-        int[] widths = {6, 16, 34, 14};
-        String[] headers = {"ID", "รหัสอุปกรณ์", "ชื่ออุปกรณ์", "สถานะ"};
-        StringBuilder sb = com.palmfarm.util.ReportExporter.header(
-            "Equipment Report / รายงานอุปกรณ์เครื่องมือทั้งหมด");
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.row(headers, widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        for (var r : list) {
-            String[] row = {
-                String.valueOf(ctrl.resource().getResourceId(r)),
-                ctrl.resource().getEquipId(r) != null ? ctrl.resource().getEquipId(r) : "",
-                ctrl.resource().getEquipmentName(r) != null ? ctrl.resource().getEquipmentName(r) : "",
-                ctrl.resource().getStatus(r)
-            };
-            sb.append(com.palmfarm.util.ReportExporter.row(row, widths)).append("\n");
-        }
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.footer(list.size()));
-        boolean ok = com.palmfarm.util.ReportExporter.saveToFile(
-            tableEquip.getScene().getWindow(), "equipment_report.txt", sb.toString());
-        lblEMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#aaaaaa;");
-        lblEMsg.setText(ok ? "Export สำเร็จ" : "ยกเลิก");
-    }
 
-    @FXML public void handleRefresh(ActionEvent e) { loadAll(); lblVMsg.setText(""); lblEMsg.setText(""); }
 
     private void vError(String msg) { lblVMsg.setStyle("-fx-text-fill:#ff8888;"); lblVMsg.setText(msg); }
     private void eError(String msg) { lblEMsg.setStyle("-fx-text-fill:#ff8888;"); lblEMsg.setText(msg); }

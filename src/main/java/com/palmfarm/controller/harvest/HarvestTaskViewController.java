@@ -123,5 +123,4 @@ public class HarvestTaskViewController implements Initializable {
             
     }
 
-    @FXML public void handleRefresh(ActionEvent e) { loadTasks(); lblMsg.setText(""); }
 }

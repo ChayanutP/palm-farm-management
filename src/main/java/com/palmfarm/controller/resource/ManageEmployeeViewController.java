@@ -131,35 +131,7 @@ public class ManageEmployeeViewController implements Initializable {
         show(ok); if (ok) loadEmployees();
     }
 
-    @FXML public void handleExport(ActionEvent e) {
-        var list = ctrl.getAllEmployees();
-        if (list.isEmpty()) { showError("ไม่มีข้อมูลพนักงาน"); return; }
-        int[] widths = {15, 26, 18, 18, 14};
-        String[] headers = {"บัตรประชาชน", "ชื่อ-สกุล", "ฝ่าย", "ตำแหน่ง", "โทรศัพท์"};
-        StringBuilder sb = com.palmfarm.util.ReportExporter.header(
-            "Employee Report / รายงานพนักงานทั้งหมด");
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.row(headers, widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        for (var emp : list) {
-            String[] row = {
-                ctrl.employee().getNationalId(emp),
-                ctrl.employee().getFullName(emp),
-                ctrl.employee().getDepartment(emp),
-                ctrl.employee().getPosition(emp) != null ? ctrl.employee().getPosition(emp) : "",
-                ctrl.employee().getPhone(emp) != null ? ctrl.employee().getPhone(emp) : ""
-            };
-            sb.append(com.palmfarm.util.ReportExporter.row(row, widths)).append("\n");
-        }
-        sb.append(com.palmfarm.util.ReportExporter.separator(widths)).append("\n");
-        sb.append(com.palmfarm.util.ReportExporter.footer(list.size()));
-        boolean ok = com.palmfarm.util.ReportExporter.saveToFile(
-            tableEmployee.getScene().getWindow(), "employee_report.txt", sb.toString());
-        lblMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#aaaaaa;");
-        lblMsg.setText(ok ? "Export สำเร็จ" : "ยกเลิก");
-    }
 
-    @FXML public void handleRefresh(ActionEvent e) { loadEmployees(); }
 
     private void show(boolean ok) {
         lblMsg.setStyle(ok ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#ff8888;");

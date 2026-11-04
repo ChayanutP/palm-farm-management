@@ -14,7 +14,6 @@
       <HBox spacing="8">
         <Button onAction="#handleMarkUsed" style="-fx-background-color:#607D8B;-fx-text-fill:white;-fx-cursor:hand;" text="บันทึกการใช้ทรัพยากร" />
         <Button fx:id="btnComplete" disable="true" onAction="#handleCompleteTask" style="-fx-background-color:#4CAF50;-fx-text-fill:white;-fx-cursor:hand;" text="งานเสร็จสิ้น + คืนทรัพยากร" />
-        <Button onAction="#handleRefresh" style="-fx-background-color:#2196F3;-fx-text-fill:white;-fx-cursor:hand;" text="รีเฟรช" />
       </HBox>
       <Label style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;" text="ใบสั่งงาน:" />
       <TableView fx:id="tableTask" prefHeight="280" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">

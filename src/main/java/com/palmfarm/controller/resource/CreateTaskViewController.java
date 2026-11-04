@@ -3,7 +3,6 @@ package com.palmfarm.controller.resource;
 import com.palmfarm.controller.ResourceController;
 import com.palmfarm.model.PlantationModel;
 import com.palmfarm.model.TaskModel;
-import com.palmfarm.util.SessionManager;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -16,7 +15,6 @@ import javafx.scene.control.*;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
-import com.palmfarm.util.ReportExporter;
 
 public class CreateTaskViewController implements Initializable {
     @FXML private TextField                 txtDescription;
@@ -152,40 +150,5 @@ public class CreateTaskViewController implements Initializable {
         };
     }
 
-    @FXML public void handleExport(ActionEvent e) {
-        var tasks = ctrl.getLatestTaskPerGroup();
-        if (tasks.isEmpty()) {
-            lblMsg.setStyle("-fx-text-fill:#ff8888;");
-            lblMsg.setText("ไม่มีข้อมูลสำหรับ export");
-            return;
-        }
-        int[] widths = {8, 32, 22, 18, 16, 18, 14};
-        String[] headers = {"Task ID", "Description", "Plantation", "Department", "Status", "Assigned", "Deadline"};
-        StringBuilder sb = ReportExporter.header("Work Order Report / รายงานใบสั่งงาน");
-        sb.append(ReportExporter.separator(widths)).append("\n");
-        sb.append(ReportExporter.row(headers, widths)).append("\n");
-        sb.append(ReportExporter.separator(widths)).append("\n");
-        for (var t : tasks) {
-            String[] row = {
-                String.valueOf(ctrl.task().getTaskId(t)),
-                ctrl.task().getDescription(t),
-                ctrl.task().getPlantationName(t),
-                ctrl.task().getDepartmentDisplay(t),
-                ctrl.task().getCompleteStatusDisplay(t),
-                ctrl.task().getOrderedStatusDisplay(t),
-                ctrl.task().getDeadline(t)
-            };
-            sb.append(ReportExporter.row(row, widths)).append("\n");
-        }
-        sb.append(ReportExporter.separator(widths)).append("\n");
-        sb.append(ReportExporter.footer(tasks.size()));
 
-        boolean saved = ReportExporter.saveToFile(
-            tableTask.getScene().getWindow(),
-            "work_order_report.txt", sb.toString());
-        lblMsg.setStyle(saved ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#aaaaaa;");
-        lblMsg.setText(saved ? "Export สำเร็จ" : "ยกเลิก");
-    }
-
-    @FXML public void handleRefresh(ActionEvent e) { loadTasks(); }
 }

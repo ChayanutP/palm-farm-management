@@ -15,8 +15,6 @@
   <center>
     <HBox spacing="15" style="-fx-padding:15;">
       <VBox spacing="8" HBox.hgrow="ALWAYS">
-        <HBox spacing="8"><Button onAction="#handleExport" style="-fx-background-color: #795548; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 5 12;" text="Export รายงาน" />
-        <Button onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-cursor: hand;" text="รีเฟรช" /></HBox>
         <TableView fx:id="tableStored" prefWidth="602.0" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">
           <columns>
             <TableColumn fx:id="colBillId" prefWidth="60" text="ID" />

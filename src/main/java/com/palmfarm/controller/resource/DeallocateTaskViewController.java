@@ -124,11 +124,6 @@ public class DeallocateTaskViewController implements Initializable {
             
     }
 
-    @FXML
-    public void handleRefresh(ActionEvent e) {
-        reqLatestOrders();
-        lblMsg.setText("");
-    }
 
     private void showSuccess(String msg) {
         lblMsg.setStyle("-fx-text-fill: #88ff88; -fx-font-size: 12px;");

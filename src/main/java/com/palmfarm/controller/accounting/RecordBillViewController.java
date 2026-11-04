@@ -2,7 +2,6 @@ package com.palmfarm.controller.accounting;
 
 import com.palmfarm.controller.AccountingController;
 import com.palmfarm.model.BillModel;
-import com.palmfarm.util.SessionManager;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -13,7 +12,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.*;
 import java.io.File;
 import java.net.URL;
-import com.palmfarm.util.ReportExporter;
 import java.util.ResourceBundle;
 
 public class RecordBillViewController implements Initializable {
@@ -37,7 +35,6 @@ public class RecordBillViewController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        var empMC = new com.palmfarm.controller.model.EmployeeModelController();
         setupTable();
         loadBills();
         txtQuantity.textProperty().addListener((o,a,b) -> updateTotal());
@@ -72,16 +69,6 @@ public class RecordBillViewController implements Initializable {
         txtPriceUnit.clear();
         dpSaleDate.setValue(null);
         lblTotalCalc.setText("รวม: —");
-    }
-
-    private void populateForm(BillModel b) {
-        txtBillNumber.setText(ctrl.bill().getBillNumber(b) != null ? ctrl.bill().getBillNumber(b) : "");
-        txtBuyer.setText(ctrl.bill().getBuyerName(b) != null ? ctrl.bill().getBuyerName(b) : "");
-        txtQuantity.setText(ctrl.bill().getPalmQuantity(b) > 0 ? String.valueOf(ctrl.bill().getPalmQuantity(b)) : "");
-        txtPriceUnit.setText(ctrl.bill().getPricePerUnit(b) > 0 ? String.valueOf(ctrl.bill().getPricePerUnit(b)) : "");
-        if (ctrl.bill().getSaleDate(b) != null && !ctrl.bill().getSaleDate(b).isBlank())
-            dpSaleDate.setValue(java.time.LocalDate.parse(ctrl.bill().getSaleDate(b)));
-        updateTotal();
     }
 
     private void loadImage(String path) {
@@ -122,40 +109,5 @@ public class RecordBillViewController implements Initializable {
     }
 
 
-    @FXML public void handleExport(ActionEvent e) {
-        var bills = ctrl.getRecordedBills();
-        if (bills.isEmpty()) {
-            lblMsg.setStyle("-fx-text-fill:#ff8888;");
-            lblMsg.setText("ไม่มีข้อมูลบิลสำหรับ export");
-            return;
-        }
-        int[] widths = {8, 18, 14, 28, 12, 12, 16};
-        String[] headers = {"Bill ID", "Bill No.", "Sale Date", "Buyer", "Qty (kg)", "Price/kg", "Total (THB)"};
-        StringBuilder report = ReportExporter.header(
-            "Bill Report / รายงานบิลการขายผลผลิต");
-        report.append(ReportExporter.separator(widths)).append("\n");
-        report.append(ReportExporter.row(headers, widths)).append("\n");
-        report.append(ReportExporter.separator(widths)).append("\n");
-        for (var b : bills) {
-            String[] row = {
-                String.valueOf(ctrl.bill().getBillId(b)),
-                ctrl.bill().getBillNumber(b),
-                ctrl.bill().getSaleDate(b),
-                ctrl.bill().getBuyerName(b),
-                String.format("%.0f", ctrl.bill().getPalmQuantity(b)),
-                String.format("%.2f", ctrl.bill().getPricePerUnit(b)),
-                String.format("%.2f", ctrl.bill().getTotalAmount(b))
-            };
-            report.append(ReportExporter.row(row, widths)).append("\n");
-        }
-        report.append(ReportExporter.separator(widths)).append("\n");
-        report.append(ReportExporter.footer(bills.size()));
-        boolean saved = ReportExporter.saveToFile(
-            tableStored.getScene().getWindow(),
-            "bill_report.txt", report.toString());
-        lblMsg.setStyle(saved ? "-fx-text-fill:#88ff88;" : "-fx-text-fill:#aaaaaa;");
-        lblMsg.setText(saved ? "Export สำเร็จ" : "ยกเลิก");
-    }
 
-    @FXML public void handleRefresh(ActionEvent e) { loadBills(); }
 }
