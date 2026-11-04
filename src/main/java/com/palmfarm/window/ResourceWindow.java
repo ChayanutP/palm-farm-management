@@ -34,13 +34,13 @@ public class ResourceWindow {
             () -> new SendTaskWindow().show());
         Button btnDeallocate  = menuButton("ยกเลิกการจัดสรร",
             () -> new DeallocateTaskWindow().show());
-        Button btnSchedule    = menuButton("เลื่อน Deadline",
+        Button btnSchedule    = menuButton("เลื่อนกำหนดการ",
             () -> new SchedulingWindow().show());
         Button btnEmployee   = menuButton("จัดการพนักงาน",
             () -> new ManageEmployeeWindow().show());
         Button btnPlantation  = menuButton("จัดการสวนปาล์ม",
             () -> new ManagePlantationWindow().show());
-        Button btnManageRes   = menuButton("จัดการยานพาหนะและอุปกรณ์",
+        Button btnManageRes   = menuButton("จัดการรถและอุปกรณ์",
             () -> new ManageResourceWindow().show());
         Button btnReport      = menuButton("ออกรายงาน",
             () -> new ReportWindow().show());
