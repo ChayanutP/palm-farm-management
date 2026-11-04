@@ -48,7 +48,7 @@ public class ReportViewController {
         String[] headers = {"Task ID", "Description", "Resource Name", "Type", "Plantation", "Date"};
         StringBuilder sb = ReportExporter.header("Resource Allocation Report / รายงานการจัดสรรทรัพยากร");
         int total = 0;
-        for (var t : ctrl.getAllTasks()) {
+        for (var t : ctrl.getLatestTaskPerGroup()) {
             if (!ctrl.task().isAllocated(t)) continue;
             var rls = ctrl.getReservationsByTask(ctrl.task().getTaskId(t));
             if (rls.isEmpty()) continue;
