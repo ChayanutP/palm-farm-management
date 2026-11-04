@@ -25,7 +25,7 @@ public class ReportViewController {
 
     @FXML public void handleExportWorkOrder(ActionEvent e) {
         List<String[]> rows = new ArrayList<>();
-        for (var t : ctrl.getLatestTaskPerGroup()) {
+        for (var t : ctrl.getAllTasks()) {
             rows.add(new String[] {
                 String.valueOf(ctrl.task().getTaskId(t)),
                 ctrl.task().getDescription(t),
