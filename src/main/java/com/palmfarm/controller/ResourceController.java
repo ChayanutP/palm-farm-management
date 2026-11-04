@@ -291,6 +291,19 @@ public class ResourceController {
         return list;
     }
 
+    public List<ResourceModel> getResourcesByType(String type) {
+        List<ResourceModel> list = new ArrayList<>();
+        try (Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(
+                RESOURCE_SELECT + "WHERE r.resource_type = ? ORDER BY r.resource_id")) {
+            ps.setString(1, type);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(resourceMC.mapFromResultSet(rs));
+            }
+        } catch (SQLException e) { errorMessage = "ดึงข้อมูล Resource ไม่สำเร็จ: " + e.getMessage(); }
+        return list;
+    }
+
     public List<ResourceModel> getAvailableResources() {
         List<ResourceModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();

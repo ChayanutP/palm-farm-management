@@ -78,8 +78,7 @@ public class ReportViewController {
 
     @FXML public void handleExportVehicle(ActionEvent e) {
         List<String[]> rows = new ArrayList<>();
-        for (var r : ctrl.getAllResources()) {
-            if (!"VEHICLE".equals(ctrl.resource().getResourceType(r))) continue;
+        for (var r : ctrl.getResourcesByType("VEHICLE")) {
             rows.add(new String[] {
                 String.valueOf(ctrl.resource().getResourceId(r)),
                 ctrl.resource().getLicensePlate(r),
@@ -96,8 +95,7 @@ public class ReportViewController {
 
     @FXML public void handleExportEquip(ActionEvent e) {
         List<String[]> rows = new ArrayList<>();
-        for (var r : ctrl.getAllResources()) {
-            if (!"EQUIPMENT".equals(ctrl.resource().getResourceType(r))) continue;
+        for (var r : ctrl.getResourcesByType("EQUIPMENT")) {
             rows.add(new String[] {
                 String.valueOf(ctrl.resource().getResourceId(r)),
                 ctrl.resource().getEquipId(r),

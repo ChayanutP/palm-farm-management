@@ -73,11 +73,8 @@ public class ManageResourceViewController implements Initializable {
     }
 
     private void loadAll() {
-        var all = ctrl.getAllResources();
-        tableVehicle.setItems(FXCollections.observableArrayList(
-            all.stream().filter(r -> "VEHICLE".equals(ctrl.resource().getResourceType(r))).toList()));
-        tableEquip.setItems(FXCollections.observableArrayList(
-            all.stream().filter(r -> "EQUIPMENT".equals(ctrl.resource().getResourceType(r))).toList()));
+        tableVehicle.setItems(FXCollections.observableArrayList(ctrl.getResourcesByType("VEHICLE")));
+        tableEquip.setItems(FXCollections.observableArrayList(ctrl.getResourcesByType("EQUIPMENT")));
         selectedVehicle = null; selectedEquip = null;
     }
 
@@ -92,9 +89,8 @@ public class ManageResourceViewController implements Initializable {
             if (seat <= 0) return "จำนวนที่นั่งต้องมากกว่า 0";
         }
         // ตรวจทะเบียนซ้ำ
-        List<ResourceModel> all = ctrl.getAllResources();
+        List<ResourceModel> all = ctrl.getResourcesByType("VEHICLE");
         for (ResourceModel r : all) {
-            if (!"VEHICLE".equals(ctrl.resource().getResourceType(r))) continue;
             if (plate.equalsIgnoreCase(ctrl.resource().getLicensePlate(r))) {
                 if (!isAdd && selectedVehicle != null &&
                     ctrl.resource().getResourceId(r) == ctrl.resource().getResourceId(selectedVehicle))
@@ -109,9 +105,8 @@ public class ManageResourceViewController implements Initializable {
     private String validateEquip(String name, boolean isAdd) {
         if (name.isBlank()) return "กรุณากรอกชื่ออุปกรณ์";
         // ตรวจชื่อซ้ำ
-        List<ResourceModel> all = ctrl.getAllResources();
+        List<ResourceModel> all = ctrl.getResourcesByType("EQUIPMENT");
         for (ResourceModel r : all) {
-            if (!"EQUIPMENT".equals(ctrl.resource().getResourceType(r))) continue;
             if (name.equalsIgnoreCase(ctrl.resource().getEquipmentName(r))) {
                 if (!isAdd && selectedEquip != null &&
                     ctrl.resource().getResourceId(r) == ctrl.resource().getResourceId(selectedEquip))
