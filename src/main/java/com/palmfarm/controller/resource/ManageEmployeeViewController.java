@@ -116,7 +116,8 @@ public class ManageEmployeeViewController implements Initializable {
             txtFirstName.getText().trim(), txtLastName.getText().trim(),
             cbDept.getValue(), txtPosition.getText().trim(), txtPhone.getText().trim());
         boolean ok = ctrl.addEmployee(emp);
-        show(ok); if (ok) loadEmployees();
+        if (ok) loadEmployees();
+        show(ok); 
     }
 
     @FXML public void handleUpdate(ActionEvent e) {
@@ -128,7 +129,8 @@ public class ManageEmployeeViewController implements Initializable {
             txtFirstName.getText().trim(), txtLastName.getText().trim(),
             cbDept.getValue(), txtPosition.getText().trim(), txtPhone.getText().trim());
         boolean ok = ctrl.updateEmployee(selectedEmp);
-        show(ok); if (ok) loadEmployees();
+        if (ok) loadEmployees();
+        show(ok); 
     }
 
 

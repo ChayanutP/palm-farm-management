@@ -90,7 +90,8 @@ public class ManagePlantationViewController implements Initializable {
         ctrl.plantation().setAll(p, name,
             Double.parseDouble(area), txtLocation.getText().trim());
         boolean ok = ctrl.addPlantation(p);
-        show(ok); if (ok) loadPlantations();
+        if (ok) loadPlantations();
+        show(ok); 
     }
 
     @FXML public void handleUpdate(ActionEvent e) {
@@ -103,7 +104,8 @@ public class ManagePlantationViewController implements Initializable {
         ctrl.plantation().setAll(selectedPlantation, name,
             Double.parseDouble(area), txtLocation.getText().trim());
         boolean ok = ctrl.updatePlantation(selectedPlantation);
-        show(ok); if (ok) loadPlantations();
+        if (ok) loadPlantations();
+        show(ok); 
     }
 
 
