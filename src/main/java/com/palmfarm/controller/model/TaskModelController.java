@@ -30,6 +30,13 @@ public class TaskModelController {
         return t.plantation_name != null ? t.plantation_name : "";
     }
     public String getAssignedTo(TaskModel t)      { return t.assigned_to; }
+    public String getCreatedBy(TaskModel t)       { return t.created_by; }
+
+    /** ชื่อผู้ออกคำสั่ง (ผู้กดสร้างใบสั่งงาน) — ไม่ผูกกับสิทธิ์ใด ฝ่ายจัดสรรเห็นเหมือนกันทุกคน */
+    public String getCreatorDisplay(TaskModel t) {
+        if (t.creator_name != null && !t.creator_name.isBlank()) return t.creator_name;
+        return "ไม่ระบุ";
+    }
 
     /** ชื่อผู้รับผิดชอบ: แสดงเฉพาะเมื่อมีการรับคำสั่งแล้ว (requisition_status = TRUE) */
     public String getResponsibleDisplay(TaskModel t) {
@@ -120,6 +127,10 @@ public class TaskModelController {
         t.deadline           = rs.getString("deadline");
         t.plantation_id      = rs.getInt("plantation_id");
         try { t.plantation_name = rs.getString("plantation_name"); }
+        catch (SQLException ignored) {}
+        try { t.created_by = rs.getString("created_by"); }
+        catch (SQLException ignored) {}
+        try { t.creator_name = rs.getString("creator_name"); }
         catch (SQLException ignored) {}
         try { t.assigned_to = rs.getString("assigned_to"); }
         catch (SQLException ignored) {}

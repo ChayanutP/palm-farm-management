@@ -60,20 +60,58 @@ public class ReportExporter {
         }
     }
 
+    /**
+     * ความกว้างที่ "มองเห็นจริง" ในฟอนต์ monospace
+     * สระบน/ล่าง และวรรณยุกต์ภาษาไทย (เช่น ิ ี ึ ื ุ ู ั ็ ่ ้ ๊ ๋ ์) เป็นตัวอักษรที่ไม่กินที่ จึงนับเป็น 0
+     * ถ้านับด้วย String.length() เหมือนเดิม แถวที่มีข้อความไทยจะดูสั้นกว่าแถวอื่นและขอบตารางเยื้อง
+     */
+    public static int displayWidth(String text) {
+        int w = 0;
+        for (int i = 0; i < text.length(); ) {
+            int cp = text.codePointAt(i);
+            i += Character.charCount(cp);
+            w += charWidth(cp);
+        }
+        return w;
+    }
+
+    private static int charWidth(int cp) {
+        int type = Character.getType(cp);
+        if (type == Character.NON_SPACING_MARK || type == Character.ENCLOSING_MARK || type == Character.FORMAT) return 0;
+        return 1;
+    }
+
+    /** ตัดข้อความให้ไม่เกิน max ช่องที่มองเห็น (ไม่ตัดสระ/วรรณยุกต์ออกจากพยัญชนะที่ยังเหลือ) */
+    private static String truncate(String text, int max) {
+        if (displayWidth(text) <= max) return text;
+        StringBuilder sb = new StringBuilder();
+        int w = 0;
+        for (int i = 0; i < text.length(); ) {
+            int cp = text.codePointAt(i);
+            int cw = charWidth(cp);
+            if (w + cw > max - 1) break;           // เหลือที่ไว้ใส่ "."
+            sb.appendCodePoint(cp);
+            w += cw;
+            i += Character.charCount(cp);
+        }
+        return sb.append('.').toString();
+    }
+
     /** จัดข้อความให้อยู่กลาง */
     public static String center(String text, int width) {
-        if (text.length() >= width) return text;
-        int pad = (width - text.length()) / 2;
+        int tw = displayWidth(text);
+        if (tw >= width) return text;
+        int pad = (width - tw) / 2;
         return " ".repeat(pad) + text;
     }
 
-    /** format row ตาราง */
+    /** format row ตาราง — เติมช่องว่างตามความกว้างที่มองเห็นจริง ขอบตารางจึงตรงทุกแถว */
     public static String row(String[] values, int[] widths) {
         StringBuilder sb = new StringBuilder("|");
         for (int i = 0; i < values.length; i++) {
-            String v = values[i] == null ? "" : values[i];
-            if (v.length() > widths[i] - 2) v = v.substring(0, widths[i] - 3) + ".";
-            sb.append(String.format(" %-" + (widths[i] - 2) + "s |", v));
+            int inner = widths[i] - 2;
+            String v = truncate(values[i] == null ? "" : values[i], inner);
+            sb.append(' ').append(v).append(" ".repeat(inner - displayWidth(v))).append(" |");
         }
         return sb.toString();
     }

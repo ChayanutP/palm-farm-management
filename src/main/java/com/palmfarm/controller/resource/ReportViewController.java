@@ -98,6 +98,7 @@ public class ReportViewController {
 
     /**
      * รายงานผู้รับผิดชอบงานและทรัพยากรที่จัดสรร — แยกเป็นบล็อกต่อใบสั่งงาน พร้อมสรุปท้ายรายงาน
+     * ผู้ออกคำสั่งคือพนักงานที่กดสร้างใบสั่งงาน (created_by) เป็นข้อมูลแสดงผลอย่างเดียว ไม่ผูกกับสิทธิ์ใด
      * ผู้รับผิดชอบคือพนักงานที่กดรับคำสั่ง (assigned_to) ถ้ายังไม่มีใครรับจะแสดง "ยังไม่มีผู้รับคำสั่ง"
      */
     @FXML public void handleExportResponsible(ActionEvent e) {
@@ -112,7 +113,8 @@ public class ReportViewController {
             taskCount++;
             sb.append("\n[Task #").append(ctrl.task().getTaskId(t)).append("] ")
               .append(ctrl.task().getDescription(t))
-              .append(" | ").append(ctrl.task().getPlantationName(t))
+              .append(" | ").append(ctrl.task().getPlantationName(t)).append("\n")
+              .append("ผู้ออกคำสั่ง: ").append(ctrl.task().getCreatorDisplay(t))
               .append(" | ผู้รับผิดชอบ: ").append(ctrl.task().getResponsibleDisplay(t)).append("\n");
             sb.append(ReportExporter.separator(widths)).append("\n");
             sb.append(ReportExporter.row(headers, widths)).append("\n");

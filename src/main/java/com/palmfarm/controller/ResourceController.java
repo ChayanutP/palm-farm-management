@@ -42,11 +42,14 @@ public class ResourceController {
     //  TASKS 
     private static final String TASK_SELECT =
         "SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, " +
-        "       t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, t.assigned_to, " +
+        "       t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, " +
+        "       t.created_by, t.assigned_to, " +
         "       p.name AS plantation_name, " +
+        "       CONCAT(c.first_name, ' ', c.last_name) AS creator_name, " +
         "       CONCAT(a.first_name, ' ', a.last_name) AS assignee_name " +
         "FROM task t " +
         "LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id " +
+        "LEFT JOIN employee c ON t.created_by = c.national_id " +
         "LEFT JOIN employee a ON t.assigned_to = a.national_id ";
 
     public List<TaskModel> getAllTasks() {
