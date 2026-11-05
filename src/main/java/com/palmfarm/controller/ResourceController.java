@@ -352,7 +352,7 @@ public class ResourceController {
      * resource ที่ถูกจัดสรร (reserved/in_use) จะแสดงข้อมูลงานที่ผูกอยู่
      * กรองเฉพาะงานที่ยังไม่เสร็จ (is_complete = FALSE) ด้วย condition ใน LEFT JOIN
      */
-    public List<ReservationLineModel> getActiveResourceAllocations() {
+    public List<ReservationLineModel> getAllResourcesWithCurrentTask() {
         List<ReservationLineModel> list = new ArrayList<>();
         String sql = "SELECT r.resource_id, r.resource_type, r.status AS resource_status, " +
                      "       COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name, " +
@@ -367,7 +367,7 @@ public class ResourceController {
                      "    AND rl.task_id IN (SELECT task_id FROM task WHERE is_complete = FALSE) " +
                      "LEFT JOIN task t              ON rl.task_id = t.task_id " +
                      "LEFT JOIN palm_plantation p   ON t.plantation_id = p.plantation_id " +
-                     "ORDER BY r.resource_type, r.resource_id";
+                     "ORDER BY r.resource_type, r.status = 'available' ASC, r.resource_id";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

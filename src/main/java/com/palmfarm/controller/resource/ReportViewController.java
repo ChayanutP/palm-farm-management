@@ -69,7 +69,7 @@ public class ReportViewController {
      */
     @FXML public void handleExportAllocation(ActionEvent e) {
         List<String[]> rows = new ArrayList<>();
-        var allocations = ctrl.getActiveResourceAllocations();
+        var allocations = ctrl.getAllResourcesWithCurrentTask();
         int vehicles = 0, equipments = 0, available = 0, inUse = 0;
         for (var rl : allocations) {
             String type       = ctrl.rl().getResourceType(rl);
