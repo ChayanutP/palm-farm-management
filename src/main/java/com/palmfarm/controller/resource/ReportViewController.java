@@ -115,7 +115,8 @@ public class ReportViewController {
               .append(ctrl.task().getDescription(t))
               .append(" | ").append(ctrl.task().getPlantationName(t)).append("\n")
               .append("ผู้ออกคำสั่ง: ").append(ctrl.task().getCreatorDisplay(t))
-              .append(" | ผู้รับผิดชอบ: ").append(ctrl.task().getResponsibleDisplay(t)).append("\n");
+              .append(" | ผู้รับผิดชอบ: ").append(ctrl.task().getResponsibleDisplay(t)).append("\n")
+              .append(" | สถานะงาน: ").append(ctrl.task().getCompleteStatusDisplay(t)).append("\n");
             sb.append(ReportExporter.separator(widths)).append("\n");
             sb.append(ReportExporter.row(headers, widths)).append("\n");
             sb.append(ReportExporter.separator(widths)).append("\n");
