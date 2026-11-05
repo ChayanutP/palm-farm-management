@@ -445,17 +445,25 @@ public class ResourceController {
     // UC9: เพิ่มพนักงาน / UC10: แก้ไขพนักงาน
     // ═══════════════════════════════════════════════
 
-    public boolean updateEmployee(EmployeeModel emp) {
-        String sql = "UPDATE employee SET first_name=?, last_name=?, department=?, position=?, phone=? " +
-                     "WHERE national_id=?";
+    /**
+     * แก้ไขข้อมูลพนักงาน (รวม username) — newPassword ว่าง = ไม่เปลี่ยนรหัสผ่านเดิม
+     */
+    public boolean updateEmployee(EmployeeModel emp, String newPassword) {
+        boolean changePassword = newPassword != null && !newPassword.isBlank();
+        String sql = "UPDATE employee SET username=?, first_name=?, last_name=?, department=?, position=?, phone=?" +
+                     (changePassword ? ", password=?" : "") +
+                     " WHERE national_id=?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, empMC.getFirstName(emp));
-            ps.setString(2, empMC.getLastName(emp));
-            ps.setString(3, empMC.getDepartment(emp));
-            ps.setString(4, empMC.getPosition(emp));
-            ps.setString(5, empMC.getPhone(emp));
-            ps.setString(6, empMC.getNationalId(emp));
+            int i = 1;
+            ps.setString(i++, empMC.getUsername(emp));
+            ps.setString(i++, empMC.getFirstName(emp));
+            ps.setString(i++, empMC.getLastName(emp));
+            ps.setString(i++, empMC.getDepartment(emp));
+            ps.setString(i++, empMC.getPosition(emp));
+            ps.setString(i++, empMC.getPhone(emp));
+            if (changePassword) ps.setString(i++, newPassword);
+            ps.setString(i, empMC.getNationalId(emp));
             ps.executeUpdate();
             successMessage = "แก้ไขข้อมูลพนักงานสำเร็จ";
             return true;

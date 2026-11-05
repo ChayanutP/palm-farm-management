@@ -47,9 +47,10 @@ public class EmployeeModelController {
     }
 
     /** ใช้ตอน Update — ไม่แตะ nationalId / username / password */
-    public void setAllForUpdate(EmployeeModel e,
+    public void setAllForUpdate(EmployeeModel e, String username,
                                 String firstName, String lastName,
                                 String department, String position, String phone) {
+        e.username   = username;
         e.first_name = firstName;
         e.last_name  = lastName;
         e.department = department;

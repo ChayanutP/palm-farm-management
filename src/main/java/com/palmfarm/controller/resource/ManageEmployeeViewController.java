@@ -61,7 +61,7 @@ public class ManageEmployeeViewController implements Initializable {
         txtNationalId.setText(ctrl.employee().getNationalId(e));
         txtNationalId.setDisable(true);
         txtUsername.setText(ctrl.employee().getUsername(e));
-        txtPassword.clear();
+        txtPassword.setText(ctrl.employee().getPassword(e));
         txtFirstName.setText(ctrl.employee().getFirstName(e));
         txtLastName.setText(ctrl.employee().getLastName(e));
         cbDept.setValue(ctrl.employee().getDepartment(e));
@@ -98,9 +98,19 @@ public class ManageEmployeeViewController implements Initializable {
     }
 
     private String validateUpdate() {
+        if (txtUsername.getText().isBlank())  return "กรุณากรอก Username";
         if (txtFirstName.getText().isBlank()) return "กรุณากรอกชื่อ";
         if (txtLastName.getText().isBlank())  return "กรุณากรอกนามสกุล";
         if (cbDept.getValue() == null)        return "กรุณาเลือกฝ่าย";
+
+        // Username ต้องไม่ซ้ำกับพนักงานคนอื่น (ข้ามพนักงานที่กำลังแก้ไขอยู่)
+        String username   = txtUsername.getText().trim();
+        String selectedId = ctrl.employee().getNationalId(selectedEmp);
+        for (EmployeeModel emp : ctrl.getAllEmployees()) {
+            if (ctrl.employee().getNationalId(emp).equals(selectedId)) continue;
+            if (ctrl.employee().getUsername(emp).equalsIgnoreCase(username))
+                return "Username \"" + username + "\" มีอยู่แล้วในระบบ";
+        }
         return null;
     }
 
@@ -126,11 +136,12 @@ public class ManageEmployeeViewController implements Initializable {
         if (err != null) { showError(err); return; }
 
         ctrl.employee().setAllForUpdate(selectedEmp,
+            txtUsername.getText().trim(),
             txtFirstName.getText().trim(), txtLastName.getText().trim(),
             cbDept.getValue(), txtPosition.getText().trim(), txtPhone.getText().trim());
-        boolean ok = ctrl.updateEmployee(selectedEmp);
+        boolean ok = ctrl.updateEmployee(selectedEmp, txtPassword.getText().trim()); // ว่าง = ไม่เปลี่ยนรหัสผ่าน
         if (ok) loadEmployees();
-        show(ok); 
+        show(ok);
     }
 
 
