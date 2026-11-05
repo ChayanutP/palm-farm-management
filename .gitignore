@@ -44,3 +44,6 @@ out/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Mermaid
+ReportViewController.md
