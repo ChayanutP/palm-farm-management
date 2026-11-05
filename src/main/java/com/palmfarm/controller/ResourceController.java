@@ -341,6 +341,57 @@ public class ResourceController {
         return list;
     }
 
+    /**
+     * ดึงรายการทรัพยากรทั้งหมดที่ถูกจัดสรรให้งานที่ยังไม่เสร็จ (is_complete = FALSE)
+     * มุมมอง resource เป็นหลัก: แสดงว่าทรัพยากรแต่ละชิ้นอยู่ที่งานไหน สถานะอะไร
+     * ใช้สำหรับ handleExportAllocation ใน ReportViewController
+     */
+    /**
+     * ดึงทรัพยากรทั้งหมดพร้อมสถานะปัจจุบัน — มุมมอง resource เป็นหลัก
+     * resource ที่ว่าง (available) จะแสดง task_id / description / plantation / deadline เป็น null
+     * resource ที่ถูกจัดสรร (reserved/in_use) จะแสดงข้อมูลงานที่ผูกอยู่
+     * กรองเฉพาะงานที่ยังไม่เสร็จ (is_complete = FALSE) ด้วย condition ใน LEFT JOIN
+     */
+    public List<ReservationLineModel> getActiveResourceAllocations() {
+        List<ReservationLineModel> list = new ArrayList<>();
+        String sql = "SELECT r.resource_id, r.resource_type, r.status AS resource_status, " +
+                     "       COALESCE(CONCAT(v.vehicle_size, ' (', v.license_plate, ')'), e.equipment_name) AS resource_name, " +
+                     "       rl.reserved_id, rl.task_id, rl.date, rl.status, " +
+                     "       t.description AS task_description, " +
+                     "       t.deadline    AS task_deadline, " +
+                     "       p.name        AS plantation_name " +
+                     "FROM resource r " +
+                     "LEFT JOIN vehicle v           ON r.resource_id  = v.resource_id " +
+                     "LEFT JOIN equipment e         ON r.resource_id  = e.resource_id " +
+                     "LEFT JOIN reservation_line rl ON r.resource_id = rl.resource_id " +
+                     "    AND rl.task_id IN (SELECT task_id FROM task WHERE is_complete = FALSE) " +
+                     "LEFT JOIN task t              ON rl.task_id = t.task_id " +
+                     "LEFT JOIN palm_plantation p   ON t.plantation_id = p.plantation_id " +
+                     "ORDER BY r.resource_type, r.resource_id";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ReservationLineModel rl = new ReservationLineModel();
+                rl.resource_id     = rs.getInt("resource_id");
+                rl.resource_type   = rs.getString("resource_type");
+                rl.resource_name   = rs.getString("resource_name");
+                rl.resource_status = rs.getString("resource_status");
+                // rl.status = status ของ reservation_line (อาจ null ถ้า resource ว่าง)
+                rl.status          = rs.getString("status");
+                rl.date            = rs.getString("date");
+                // task fields — null ถ้า resource ว่าง
+                int taskId = rs.getInt("task_id");
+                rl.task_id          = rs.wasNull() ? 0 : taskId;
+                rl.task_description = rs.getString("task_description");
+                rl.task_deadline    = rs.getString("task_deadline");
+                rl.plantation_name  = rs.getString("plantation_name");
+                list.add(rl);
+            }
+        } catch (SQLException e) { errorMessage = "ดึงข้อมูลการจัดสรรทรัพยากรไม่สำเร็จ: " + e.getMessage(); }
+        return list;
+    }
+
     public boolean assignResourcesToTask(int taskId, List<Integer> resourceIds) {
         if (resourceIds.isEmpty()) {
             errorMessage = "กรุณาเลือกทรัพยากรอย่างน้อย 1 รายการ";

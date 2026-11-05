@@ -43,6 +43,23 @@ public class ReservationLineModelController {
         return rl.status;
     }
 
+    // Extra getters สำหรับ getActiveResourceAllocations()
+    public String getResourceStatus(ReservationLineModel rl) {
+        return rl.resource_status != null ? rl.resource_status : "-";
+    }
+
+    public String getTaskDescription(ReservationLineModel rl) {
+        return rl.task_description != null ? rl.task_description : "-";
+    }
+
+    public String getTaskDeadline(ReservationLineModel rl) {
+        return rl.task_deadline != null ? rl.task_deadline : "-";
+    }
+
+    public String getPlantationName(ReservationLineModel rl) {
+        return rl.plantation_name != null ? rl.plantation_name : "-";
+    }
+
     public String getReturnStatus(ReservationLineModel rl) {
     if (rl == null || rl.status == null) return "not_returned";
     return "returned".equalsIgnoreCase(rl.status) ? "returned" : "not_returned";

@@ -57,43 +57,45 @@ public class ReportViewController {
                     "มีผู้รับคำสั่งแล้ว: " + received + " งาน"));
     }
 
-    /** รายงานนี้แยกตารางตาม task จึงไม่ใช้ exportTable() */
+    /**
+     * รายงานทรัพยากรที่ถูกใช้งานอยู่ในปัจจุบัน — มุมมอง resource เป็นหลัก
+     * แสดงว่าทรัพยากรแต่ละชิ้นอยู่ที่งานไหน สถานะอะไร deadline เมื่อไหร่
+     * กรองเฉพาะงานที่ยังไม่เสร็จ (is_complete = FALSE)
+     */
+    /**
+     * รายงานทรัพยากรทั้งหมดพร้อมสถานะปัจจุบัน — มุมมอง resource เป็นหลัก
+     * แสดงทุกชิ้น: ที่ว่าง (available) และที่ถูกจัดสรรอยู่ (reserved/in_use)
+     * ช่วยให้ผู้จัดสรรเห็นภาพรวมว่าอะไรว่าง อะไรถูกใช้อยู่กับงานไหน
+     */
     @FXML public void handleExportAllocation(ActionEvent e) {
-        int[] widths = {8, 26, 22, 18, 22, 12};
-        String[] headers = {"Task ID", "Description", "Resource Name", "Type", "Plantation", "Date"};
-        StringBuilder sb = ReportExporter.header("Resource Allocation Report / รายงานการจัดสรรทรัพยากร");
-        int taskCount = 0, total = 0, vehicles = 0, equipments = 0;
-        for (var t : ctrl.getAllTasks()) {
-            if (!ctrl.task().isAllocated(t)) continue;
-            var rls = ctrl.getReservationsByTask(ctrl.task().getTaskId(t));
-            if (rls.isEmpty()) continue;
-            taskCount++;
-            sb.append(ReportExporter.separator(widths)).append("\n");
-            sb.append(ReportExporter.row(headers, widths)).append("\n");
-            sb.append(ReportExporter.separator(widths)).append("\n");
-            for (var rl : rls) {
-                String type = ctrl.rl().getResourceType(rl);
-                String[] row = {
-                    String.valueOf(ctrl.task().getTaskId(t)),
-                    ctrl.task().getDescription(t),
-                    ctrl.rl().getResourceName(rl),
-                    type,
-                    ctrl.task().getPlantationName(t),
-                    ctrl.rl().getDate(rl)
-                };
-                sb.append(ReportExporter.row(row, widths)).append("\n");
-                total++;
-                if ("VEHICLE".equals(type)) vehicles++;
-                else if ("EQUIPMENT".equals(type)) equipments++;
-            }
+        List<String[]> rows = new ArrayList<>();
+        var allocations = ctrl.getActiveResourceAllocations();
+        int vehicles = 0, equipments = 0, available = 0, inUse = 0;
+        for (var rl : allocations) {
+            String type       = ctrl.rl().getResourceType(rl);
+            String status     = ctrl.rl().getResourceStatus(rl);
+            boolean hasTask   = ctrl.rl().getTaskId(rl) != 0;
+            rows.add(new String[] {
+                ctrl.rl().getResourceName(rl),
+                type,
+                status,
+                hasTask ? String.valueOf(ctrl.rl().getTaskId(rl))  : "-",
+                hasTask ? ctrl.rl().getTaskDescription(rl)         : "-",
+                hasTask ? ctrl.rl().getPlantationName(rl)          : "-",
+                hasTask ? ctrl.rl().getTaskDeadline(rl)            : "-"
+            });
+            if ("VEHICLE".equals(type))    vehicles++;
+            else if ("EQUIPMENT".equals(type)) equipments++;
+            if ("available".equals(status))    available++;
+            else                               inUse++;
         }
-        if (total == 0) { showError(emptyOr("ไม่มีข้อมูลการจัดสรรทรัพยากร")); return; }
-        sb.append(ReportExporter.separator(widths)).append("\n");
-        sb.append(ReportExporter.summary(
-            "จำนวนใบสั่งงานที่มีการจัดสรรทรัพยากรแล้ว: " + taskCount + " งาน",
-            "รวมทรัพยากรที่ถูกจัดสรรทั้งหมด: " + total + " รายการ (VEHICLE: "
-                + vehicles + " คัน, EQUIPMENT: " + equipments + " ชิ้น)"));
-        save("resource_allocation_report.txt", sb.toString());
+        exportTable("Resource Allocation Report / รายงานสถานะทรัพยากรปัจจุบัน",
+            "resource_allocation_report.txt",
+            new int[] {28, 10, 12, 8, 26, 18, 14},
+            new String[] {"Resource Name", "Type", "Status", "Task ID", "Task Description", "Plantation", "Deadline"},
+            rows, "ไม่มีข้อมูลทรัพยากร",
+            List.of("ทรัพยากรทั้งหมด: " + allocations.size() + " รายการ (VEHICLE: " + vehicles + " | EQUIPMENT: " + equipments + ")",
+                    "ว่าง: " + available + " รายการ | ถูกใช้งาน: " + inUse + " รายการ"));
     }
 
     /**
