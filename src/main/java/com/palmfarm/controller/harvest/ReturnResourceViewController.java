@@ -1,6 +1,7 @@
 package com.palmfarm.controller.harvest;
 
 import com.palmfarm.controller.HarvestController;
+import com.palmfarm.controller.PalmCareController;
 import com.palmfarm.model.ReservationLineModel;
 import com.palmfarm.model.TaskModel;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -31,7 +32,7 @@ public class ReturnResourceViewController implements Initializable {
     @FXML private Button btnComplete;
     @FXML private Label  lblMsg;
 
-    private final HarvestController ctrl = new HarvestController();
+    private final PalmCareController ctrl = new PalmCareController();
     private TaskModel selectedTask;
 
     @Override

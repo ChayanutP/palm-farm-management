@@ -1,6 +1,7 @@
 package com.palmfarm.controller.harvest;
 
 import com.palmfarm.controller.HarvestController;
+import com.palmfarm.controller.PalmCareController;
 import com.palmfarm.model.ReservationLineModel;
 import com.palmfarm.model.TaskModel;
 import javafx.animation.Animation;
@@ -35,7 +36,7 @@ public class UseResourceViewController implements Initializable {
     @FXML private Button btnMarkUsed;
     @FXML private Label  lblMsg;
 
-    private final HarvestController ctrl = new HarvestController();
+    private final PalmCareController ctrl = new PalmCareController();
     private TaskModel selectedTask;
     private Timeline autoRefresh;
 
