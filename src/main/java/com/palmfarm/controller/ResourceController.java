@@ -39,7 +39,7 @@ public class ResourceController {
         return list;
     }
 
-    //  TASKS 
+    //  query TASKS แสดงชื่อผู้ออกคำสั่ง/ผู้รับผิดชอบ
     private static final String TASK_SELECT =
         "SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, " +
         "       t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, " +
@@ -51,6 +51,17 @@ public class ResourceController {
         "LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id " +
         "LEFT JOIN employee c ON t.created_by = c.national_id " +
         "LEFT JOIN employee a ON t.assigned_to = a.national_id ";
+
+    /**
+     * SELECT แบบสั้น — ใช้กับ query ที่หน้าจอไม่ได้แสดงชื่อผู้ออกคำสั่ง/ผู้รับผิดชอบ
+     * ตัด JOIN employee ออก 2 ตัว ให้ดึงเฉพาะคอลัมน์ที่ถูกนำไปแสดงผลจริง
+     */
+    private static final String TASK_SELECT_BASIC =
+        "SELECT t.task_id, t.description, t.department, t.is_complete, t.is_allocated, t.is_ordered, " +
+        "       t.requisition_status, t.work_ordered_date, t.deadline, t.plantation_id, " +
+        "       p.name AS plantation_name " +
+        "FROM task t " +
+        "LEFT JOIN palm_plantation p ON t.plantation_id = p.plantation_id ";
 
     public List<TaskModel> getAllTasks() {
         List<TaskModel> list = new ArrayList<>();
@@ -69,7 +80,7 @@ public class ResourceController {
         List<TaskModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                 TASK_SELECT + "WHERE t.is_complete = FALSE ORDER BY t.deadline ASC");
+                 TASK_SELECT_BASIC + "WHERE t.is_complete = FALSE ORDER BY t.deadline ASC");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(taskMC.mapFromResultSet(rs));
         } catch (SQLException e) {
@@ -86,7 +97,7 @@ public class ResourceController {
      */
     public List<TaskModel> getLatestTaskPerGroup() {
         List<TaskModel> list = new ArrayList<>();
-        String sql = TASK_SELECT +
+        String sql = TASK_SELECT_BASIC +
             "INNER JOIN (" +
             "  SELECT task_id" +
             "  FROM (" +
@@ -115,7 +126,7 @@ public class ResourceController {
         List<TaskModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                 TASK_SELECT +
+                 TASK_SELECT_BASIC +
                  "WHERE t.is_complete = FALSE " +
                  "  AND t.is_ordered = FALSE " +
                  "ORDER BY t.work_ordered_date ASC");
@@ -131,7 +142,7 @@ public class ResourceController {
         List<TaskModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                 TASK_SELECT + "WHERE t.is_ordered = FALSE AND t.is_allocated = TRUE ORDER BY t.work_ordered_date ASC");
+                 TASK_SELECT_BASIC + "WHERE t.is_ordered = FALSE AND t.is_allocated = TRUE ORDER BY t.work_ordered_date ASC");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(taskMC.mapFromResultSet(rs));
         } catch (SQLException e) { errorMessage = "ดึงข้อมูล Task ไม่สำเร็จ: " + e.getMessage(); }
@@ -142,7 +153,7 @@ public class ResourceController {
         List<TaskModel> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                 TASK_SELECT +
+                 TASK_SELECT_BASIC +
                  "WHERE t.is_complete = FALSE " +
                  " AND t.is_allocated = TRUE " +
                  " AND t.is_ordered = FALSE " +
