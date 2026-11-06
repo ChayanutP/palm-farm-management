@@ -7,10 +7,9 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane style="-fx-background-color:#1a2a1a;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.palmfarm.controller.resource.AssignResourceViewController">
+<BorderPane style="-fx-background-color:#1a2a1a;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.palmfarm.controller.resource.AssignResourceViewController">
   <center>
     <VBox spacing="10" style="-fx-padding:15;">
 
@@ -33,13 +32,13 @@
             <Label style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;" text="ทรัพยากรที่พร้อมใช้งาน (เลือกได้หลายรายการ):" />
             <Button onAction="#handleAssign" style="-fx-background-color:#FF9800;-fx-text-fill:white;                            -fx-cursor:hand;-fx-font-weight:bold;-fx-padding:6 14;" text="จัดสรรที่เลือกทั้งหมด" />
           </HBox>
-          <TableView fx:id="tableResource" editable="true" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">
+          <TableView fx:id="tableResource" editable="true" prefHeight="400.0" prefWidth="389.0" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">
             <columns>
-              <TableColumn fx:id="colCheck" editable="true" prefWidth="60" text="เลือก" />
-              <TableColumn fx:id="colResId" prefWidth="55" text="ID" />
-              <TableColumn fx:id="colResName" prefWidth="230" text="ชื่อ" />
+              <TableColumn fx:id="colCheck" editable="true" prefWidth="45.0" text="เลือก" />
+              <TableColumn fx:id="colResId" prefWidth="46.0" text="ID" />
+              <TableColumn fx:id="colResName" prefWidth="254.0" text="ชื่อ" />
               <TableColumn fx:id="colResType" prefWidth="110" text="ประเภท" />
-              <TableColumn fx:id="colResStatus" prefWidth="100" text="สถานะ" />
+              <TableColumn fx:id="colResStatus" prefWidth="100.0" text="สถานะ" />
             </columns>
             <placeholder>
               <Label style="-fx-text-fill:#88aa88;" text="ไม่มีทรัพยากรที่พร้อมใช้งาน" />
@@ -54,12 +53,12 @@
         <!-- ขวา: รายการที่จัดสรรให้ task นี้แล้ว -->
         <VBox prefWidth="340" spacing="6">
           <Label style="-fx-text-fill:#aaccaa;-fx-font-weight:bold;" text="ทรัพยากรที่จัดสรรให้ใบสั่งงานนี้แล้ว:" />
-          <TableView fx:id="tableReservation" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">
+          <TableView fx:id="tableReservation" prefHeight="435.0" prefWidth="426.0" style="-fx-background-color:#243224;-fx-control-inner-background:#243224;" VBox.vgrow="ALWAYS">
             <columns>
               <TableColumn fx:id="colRlResource" prefWidth="145" text="ทรัพยากร" />
-              <TableColumn fx:id="colRlType" prefWidth="90" text="ประเภท" />
-              <TableColumn fx:id="colRlDate" prefWidth="105" text="วันที่" />
-              <TableColumn fx:id="colRlStatus" prefWidth="90" text="สถานะ" />
+              <TableColumn fx:id="colRlType" prefWidth="56.0" text="ประเภท" />
+              <TableColumn fx:id="colRlDate" prefWidth="92.0" text="วันที่จอง" />
+              <TableColumn fx:id="colRlStatus" prefWidth="71.0" text="สถานะ" />
             </columns>
             <placeholder>
               <Label style="-fx-text-fill:#88aa88;" text="เลือกใบสั่งงานเพื่อดูรายการ" />

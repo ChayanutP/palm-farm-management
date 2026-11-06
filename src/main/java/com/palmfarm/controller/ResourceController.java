@@ -408,43 +408,31 @@ public class ResourceController {
             errorMessage = "กรุณาเลือกทรัพยากรอย่างน้อย 1 รายการ";
             return false;
         }
-        String sqlDate  = "SELECT deadline FROM task WHERE task_id=?";
-        String sqlIns = "INSERT INTO reservation_line (task_id, resource_id, date, status) VALUES (?, ?, ?, 'pending')";
+        String sqlIns   = "INSERT INTO reservation_line (task_id, resource_id, date, status) VALUES (?, ?, ?, 'pending')";
         String sqlRes   = "UPDATE resource SET status='reserved' WHERE resource_id=?";
         String sqlAlloc = "UPDATE task SET is_allocated=TRUE WHERE task_id=?";
 
         try (Connection con = DBConnection.getConnection()) {
             con.setAutoCommit(false);
             try {
-                String dateStr = java.time.LocalDate.now().toString();
-                try (PreparedStatement dp = con.prepareStatement(sqlDate)) {
-                    dp.setInt(1, taskId);
-                    try (ResultSet dr = dp.executeQuery()) {
-                        if (dr.next() && dr.getString("deadline") != null) {
-                            dateStr = dr.getString("deadline");
-                        }
-                    }
-                }
+                String dateStr = java.time.LocalDate.now().toString();   // วันที่จัดสรร
 
                 try (PreparedStatement ins = con.prepareStatement(sqlIns);
-                     PreparedStatement upd = con.prepareStatement(sqlRes);
-                     PreparedStatement pa  = con.prepareStatement(sqlAlloc)) {
+                    PreparedStatement upd = con.prepareStatement(sqlRes);
+                    PreparedStatement pa  = con.prepareStatement(sqlAlloc)) {
                     for (int rid : resourceIds) {
                         ins.setInt(1, taskId);
                         ins.setInt(2, rid);
                         ins.setString(3, dateStr);
                         ins.addBatch();
-
                         upd.setInt(1, rid);
                         upd.addBatch();
                     }
                     ins.executeBatch();
                     upd.executeBatch();
-
                     pa.setInt(1, taskId);
                     pa.executeUpdate();
                 }
-
                 con.commit();
                 successMessage = "จัดสรรทรัพยากร " + resourceIds.size() + " รายการสำเร็จ";
                 return true;
@@ -453,8 +441,8 @@ public class ResourceController {
                 throw e;
             }
         } catch (SQLException e) {
-            errorMessage = "จัดสรรทรัพยากรไม่สำเร็จ: " + e.getMessage();
-            return false;
+                errorMessage = "จัดสรรทรัพยากรไม่สำเร็จ: " + e.getMessage();
+                return false;
         }
     }
 
